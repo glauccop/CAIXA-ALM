@@ -12,22 +12,47 @@ declare global {
                     'hist-001': {
                         table: 'x_snc_almcaixa_historias_usuario'
                         id: 'c23b8160d08e47edaa13f8b6da1d3919'
+                        deleted: true
                     }
                     'hist-002': {
                         table: 'x_snc_almcaixa_historias_usuario'
                         id: '9acdaf487a9945fe891ec3aded0c7f7b'
+                        deleted: true
                     }
                     'hist-003': {
                         table: 'x_snc_almcaixa_historias_usuario'
                         id: '1292efbec3aa48c0ae18b2b6162c5ee8'
+                        deleted: true
                     }
                     'hist-004': {
                         table: 'x_snc_almcaixa_historias_usuario'
                         id: '7450a6fda3ab4335a1272ff4e65897d3'
+                        deleted: true
                     }
                     'hist-005': {
                         table: 'x_snc_almcaixa_historias_usuario'
                         id: '19fa7c0627fc41d6bfa61f33e7c33324'
+                        deleted: true
+                    }
+                    historia_usuario_001: {
+                        table: 'x_snc_almcaixa_historias_usuario'
+                        id: '17e73e83bca64b82a0fb69c0b048a7d6'
+                    }
+                    historia_usuario_002: {
+                        table: 'x_snc_almcaixa_historias_usuario'
+                        id: 'a24d3ce853bd4053a2e4cb662889f81e'
+                    }
+                    historia_usuario_003: {
+                        table: 'x_snc_almcaixa_historias_usuario'
+                        id: '5de2441e39b3480eba8af047fcddd3d9'
+                    }
+                    historia_usuario_004: {
+                        table: 'x_snc_almcaixa_historias_usuario'
+                        id: '346453985a9d429ea89129bcb748c79f'
+                    }
+                    historia_usuario_005: {
+                        table: 'x_snc_almcaixa_historias_usuario'
+                        id: '4f6dcab97c57417688a7909abd9876a9'
                     }
                     'incident-manager-page': {
                         table: 'sys_ui_page'
@@ -229,6 +254,15 @@ declare global {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'prioridade'
                             value: 'baixa'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '0bcdbbbf43d341089b078a03f787a2f9'
+                        key: {
+                            name: 'x_snc_almcaixa_historias_usuario'
+                            element: 'numero'
+                            language: 'en'
                         }
                     },
                     {
@@ -731,6 +765,14 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_number'
+                        id: '7510cf9f68c24ff1a37cb7336836e848'
+                        key: {
+                            category: 'x_snc_almcaixa_historias_usuario'
+                            prefix: 'STY'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '7546ec5cb4a846d7b88a009d9e56116f'
                         key: {
@@ -1128,6 +1170,14 @@ declare global {
                         key: {
                             name: 'x_snc_almcaixa_historias_usuario'
                             element: 'criterios_aceitacao'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'b56e9104c5274b85b1db419936091354'
+                        key: {
+                            name: 'x_snc_almcaixa_historias_usuario'
+                            element: 'numero'
                         }
                     },
                     {

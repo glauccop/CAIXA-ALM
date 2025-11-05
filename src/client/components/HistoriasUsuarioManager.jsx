@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { HistoriasUsuarioService, RequisitosService } from '../services/RequirementsServices.js'
+import { HistoriasUsuarioService } from '../services/RequirementsServices.js'
 import { display, value } from '../utils/fields.js'
 
 export default function HistoriasUsuarioManager() {
   const [historias, setHistorias] = useState([])
-  const [requisitos, setRequisitos] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [selectedItem, setSelectedItem] = useState(null)
@@ -12,22 +11,18 @@ export default function HistoriasUsuarioManager() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterPrioridade, setFilterPrioridade] = useState('')
+  const [viewMode, setViewMode] = useState('cards') // 'cards', 'lista', 'kanban'
 
-  const historiaService = useMemo(() => new HistoriasUsuarioService(), [])
-  const requisitoService = useMemo(() => new RequisitosService(), [])
+  const service = useMemo(() => new HistoriasUsuarioService(), [])
 
   const refreshData = async () => {
     try {
       setLoading(true)
       setError(null)
-      const [histData, reqData] = await Promise.all([
-        historiaService.list(),
-        requisitoService.list()
-      ])
-      setHistorias(histData)
-      setRequisitos(reqData)
+      const data = await service.list()
+      setHistorias(data)
     } catch (err) {
-      setError('Falha ao carregar dados: ' + (err.message || 'Erro desconhecido'))
+      setError('Falha ao carregar histórias: ' + (err.message || 'Erro desconhecido'))
       console.error(err)
     } finally {
       setLoading(false)
@@ -53,7 +48,7 @@ export default function HistoriasUsuarioManager() {
     
     try {
       const sysId = value(item.sys_id)
-      await historiaService.delete(sysId)
+      await service.delete(sysId)
       await refreshData()
     } catch (err) {
       setError('Falha ao excluir história: ' + (err.message || 'Erro desconhecido'))
@@ -65,9 +60,9 @@ export default function HistoriasUsuarioManager() {
       setLoading(true)
       if (selectedItem) {
         const sysId = value(selectedItem.sys_id)
-        await historiaService.update(sysId, formData)
+        await service.update(sysId, formData)
       } else {
-        await historiaService.create(formData)
+        await service.create(formData)
       }
       setShowForm(false)
       await refreshData()
@@ -78,22 +73,32 @@ export default function HistoriasUsuarioManager() {
     }
   }
 
+  const handleStatusChange = async (item, newStatus) => {
+    try {
+      const sysId = value(item.sys_id)
+      await service.update(sysId, { status: newStatus })
+      await refreshData()
+    } catch (err) {
+      setError('Falha ao atualizar status: ' + (err.message || 'Erro desconhecido'))
+    }
+  }
+
   const filteredHistorias = historias.filter(item => {
-    const searchMatch = display(item.titulo).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       display(item.codigo).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       display(item.persona).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       display(item.acao_desejada).toLowerCase().includes(searchTerm.toLowerCase())
-    const statusMatch = !filterStatus || display(item.status) === filterStatus
-    const prioridadeMatch = !filterPrioridade || display(item.prioridade) === filterPrioridade
+    const matchesSearch = display(item.titulo).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         display(item.codigo).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         display(item.numero).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         display(item.persona).toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = !filterStatus || display(item.status) === filterStatus
+    const matchesPrioridade = !filterPrioridade || display(item.prioridade) === filterPrioridade
     
-    return searchMatch && statusMatch && prioridadeMatch
+    return matchesSearch && matchesStatus && matchesPrioridade
   })
 
   const getStatusBadge = (status) => {
     const statusMap = {
       'nova': 'badge-secondary',
-      'em_andamento': 'badge-warning',
-      'em_teste': 'badge-info',
+      'em_andamento': 'badge-info',
+      'em_teste': 'badge-warning',
       'concluida': 'badge-success',
       'cancelada': 'badge-danger'
     }
@@ -104,7 +109,7 @@ export default function HistoriasUsuarioManager() {
     const prioridadeMap = {
       'critica': 'badge-danger',
       'alta': 'badge-warning',
-      'media': 'badge-info',
+      'media': 'badge-info', 
       'baixa': 'badge-secondary'
     }
     return prioridadeMap[value(prioridade)] || 'badge-secondary'
@@ -120,9 +125,16 @@ export default function HistoriasUsuarioManager() {
 
   return (
     <div className="content-container">
-      <div className="page-header">
-        <h1 className="page-title">Histórias de Usuário</h1>
-        <p className="page-subtitle">Criação no formato "Como... Eu quero... Para que..."</p>
+      <div className="page-header-wrapper">
+        <div className="page-title-section">
+          <h1 className="page-title">Histórias de Usuário</h1>
+          <p className="page-subtitle">Criação no formato "As a... I want... So that..."</p>
+        </div>
+        <div className="page-actions">
+          <button className="btn btn-primary" onClick={handleCreate}>
+            ➕ Nova História
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -134,10 +146,27 @@ export default function HistoriasUsuarioManager() {
 
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">Filtros e Busca</h2>
-          <button className="btn btn-primary" onClick={handleCreate}>
-            ➕ Nova História
-          </button>
+          <h2 className="card-title">Filtros e Visualização</h2>
+          <div className="view-toggles">
+            <button 
+              className={`btn ${viewMode === 'cards' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setViewMode('cards')}
+            >
+              📊 Cards
+            </button>
+            <button 
+              className={`btn ${viewMode === 'lista' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setViewMode('lista')}
+            >
+              📋 Lista
+            </button>
+            <button 
+              className={`btn ${viewMode === 'kanban' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setViewMode('kanban')}
+            >
+              🗂️ Kanban
+            </button>
+          </div>
         </div>
         
         <div className="filters-row">
@@ -145,7 +174,7 @@ export default function HistoriasUsuarioManager() {
             <input
               type="text"
               className="form-control"
-              placeholder="Buscar por código, título, persona ou ação..."
+              placeholder="Buscar por título, código, número ou persona..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -182,72 +211,36 @@ export default function HistoriasUsuarioManager() {
         </div>
       </div>
 
-      <div className="historias-grid">
-        {filteredHistorias.map(item => (
-          <div key={value(item.sys_id)} className="historia-card">
-            <div className="card-header">
-              <div className="historia-header">
-                <span className="historia-codigo">{display(item.codigo)}</span>
-                <div className="card-badges">
-                  <span className={`badge ${getStatusBadge(item.status)}`}>
-                    {display(item.status)}
-                  </span>
-                  <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
-                    {display(item.prioridade)}
-                  </span>
-                </div>
-              </div>
-              <h3 className="historia-titulo">{display(item.titulo)}</h3>
-            </div>
-            
-            <div className="historia-content">
-              <div className="historia-story">
-                <p className="story-part">
-                  <strong>Como</strong> {display(item.persona)},
-                </p>
-                <p className="story-part">
-                  <strong>Eu quero</strong> {display(item.acao_desejada)},
-                </p>
-                <p className="story-part">
-                  <strong>Para que</strong> {display(item.beneficio)}.
-                </p>
-              </div>
-              
-              {item.criterios_aceitacao && display(item.criterios_aceitacao) && (
-                <div className="criterios-aceitacao">
-                  <strong>Critérios de Aceitação:</strong>
-                  <p>{display(item.criterios_aceitacao)}</p>
-                </div>
-              )}
-              
-              {item.requisito_relacionado && display(item.requisito_relacionado) && (
-                <p className="historia-requisito">
-                  <strong>Requisito:</strong> {display(item.requisito_relacionado)}
-                </p>
-              )}
-              
-              <p className="historia-data">
-                <strong>Criada em:</strong> {new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}
-              </p>
-            </div>
-            
-            <div className="card-actions">
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => handleEdit(item)}
-              >
-                ✏️ Editar
-              </button>
-              <button 
-                className="btn btn-danger btn-sm"
-                onClick={() => handleDelete(item)}
-              >
-                🗑️ Excluir
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {viewMode === 'cards' && (
+        <CardsView
+          historias={filteredHistorias}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          getStatusBadge={getStatusBadge}
+          getPrioridadeBadge={getPrioridadeBadge}
+        />
+      )}
+
+      {viewMode === 'lista' && (
+        <ListaView
+          historias={filteredHistorias}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          getStatusBadge={getStatusBadge}
+          getPrioridadeBadge={getPrioridadeBadge}
+        />
+      )}
+
+      {viewMode === 'kanban' && (
+        <KanbanView
+          historias={filteredHistorias}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
+          getStatusBadge={getStatusBadge}
+          getPrioridadeBadge={getPrioridadeBadge}
+        />
+      )}
 
       {filteredHistorias.length === 0 && !loading && (
         <div className="empty-state">
@@ -258,23 +251,148 @@ export default function HistoriasUsuarioManager() {
       {showForm && (
         <HistoriaForm
           item={selectedItem}
-          requisitos={requisitos}
           onSubmit={handleFormSubmit}
           onCancel={() => setShowForm(false)}
         />
       )}
 
       <style jsx>{`
+        .page-header-wrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 2rem;
+          gap: 2rem;
+        }
+
+        .page-title-section {
+          flex: 1;
+        }
+
+        .page-actions {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+
+        .view-toggles {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .view-toggles .btn {
+          padding: 0.5rem 1rem;
+          font-size: 0.85rem;
+        }
+
         .filters-row {
           display: grid;
           grid-template-columns: 2fr 1fr 1fr;
           gap: 1rem;
           margin-bottom: 0;
         }
-        
+
+        .empty-state {
+          text-align: center;
+          padding: 3rem;
+          color: #666;
+          font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+          .page-header-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .page-actions {
+            justify-content: stretch;
+          }
+
+          .page-actions .btn {
+            flex: 1;
+          }
+
+          .filters-row {
+            grid-template-columns: 1fr;
+          }
+
+          .view-toggles {
+            justify-content: center;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Cards View Component
+function CardsView({ historias, onEdit, onDelete, getStatusBadge, getPrioridadeBadge }) {
+  return (
+    <div className="historias-grid">
+      {historias.map(item => (
+        <div key={value(item.sys_id)} className="historia-card">
+          <div className="card-header">
+            <div className="historia-badges">
+              <span className="badge badge-primary">
+                {display(item.numero)}
+              </span>
+              <span className="badge badge-accent">
+                {display(item.codigo)}
+              </span>
+            </div>
+            <div className="status-badges">
+              <span className={`badge ${getStatusBadge(item.status)}`}>
+                {display(item.status)}
+              </span>
+              <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                {display(item.prioridade)}
+              </span>
+            </div>
+          </div>
+          
+          <div className="historia-content">
+            <h3 className="historia-titulo">{display(item.titulo)}</h3>
+            
+            <div className="historia-story">
+              <p><strong>Como</strong> {display(item.persona)}</p>
+              <p><strong>Eu quero</strong> {display(item.acao_desejada)}</p>
+              <p><strong>Para que</strong> {display(item.beneficio)}</p>
+            </div>
+
+            {display(item.criterios_aceitacao) && (
+              <div className="criterios-preview">
+                <strong>Critérios de Aceitação:</strong>
+                <p>{display(item.criterios_aceitacao).substring(0, 100)}...</p>
+              </div>
+            )}
+
+            <p className="historia-data">
+              <strong>Criada em:</strong> {new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}
+            </p>
+          </div>
+          
+          <div className="card-actions">
+            <button 
+              className="btn btn-secondary btn-sm"
+              onClick={() => onEdit(item)}
+            >
+              ✏️ Editar
+            </button>
+            <button 
+              className="btn btn-danger btn-sm"
+              onClick={() => onDelete(item)}
+            >
+              🗑️ Excluir
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <style jsx>{`
         .historias-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
           gap: 1.5rem;
           margin-top: 1.5rem;
         }
@@ -285,7 +403,6 @@ export default function HistoriasUsuarioManager() {
           box-shadow: var(--shadow-md);
           padding: 1.5rem;
           transition: transform 0.2s, box-shadow 0.2s;
-          border-left: 4px solid var(--accent);
         }
         
         .historia-card:hover {
@@ -293,82 +410,52 @@ export default function HistoriasUsuarioManager() {
           box-shadow: var(--shadow-lg);
         }
         
-        .historia-header {
+        .historia-badges {
           display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 0.5rem;
+          gap: 0.5rem;
         }
-        
-        .historia-codigo {
-          background: var(--accent);
-          color: var(--white);
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-          font-size: 0.8rem;
-          font-weight: 600;
+
+        .status-badges {
+          display: flex;
+          gap: 0.5rem;
         }
         
         .historia-titulo {
           font-size: 1.1rem;
           font-weight: 600;
           color: var(--primary);
-          margin: 0.5rem 0 1rem 0;
-        }
-        
-        .card-badges {
-          display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-        }
-        
-        .historia-content {
           margin: 1rem 0;
         }
         
         .historia-story {
-          background: var(--light);
-          padding: 1rem;
-          border-radius: 8px;
-          margin-bottom: 1rem;
-          border-left: 3px solid var(--primary);
-        }
-        
-        .story-part {
-          margin: 0 0 0.5rem 0;
-          font-style: italic;
-          line-height: 1.4;
-        }
-        
-        .story-part:last-child {
-          margin-bottom: 0;
-        }
-        
-        .criterios-aceitacao {
           background: #f8f9fa;
           padding: 1rem;
           border-radius: 8px;
-          margin-bottom: 1rem;
-          border: 1px solid #e9ecef;
+          margin: 1rem 0;
         }
-        
-        .criterios-aceitacao p {
-          margin: 0.5rem 0 0 0;
-          color: #666;
-          font-size: 0.9rem;
+
+        .historia-story p {
+          margin: 0.5rem 0;
           line-height: 1.4;
         }
-        
-        .historia-requisito {
+
+        .criterios-preview {
+          margin: 1rem 0;
+          padding: 0.75rem;
+          background: #e3f2fd;
+          border-radius: 6px;
           font-size: 0.9rem;
+        }
+
+        .criterios-preview p {
+          margin: 0.5rem 0 0 0;
           color: #666;
-          margin: 0 0 0.5rem 0;
         }
         
         .historia-data {
           font-size: 0.85rem;
           color: #666;
-          margin: 0;
+          margin: 1rem 0 0 0;
         }
         
         .card-actions {
@@ -379,26 +466,10 @@ export default function HistoriasUsuarioManager() {
           padding-top: 1rem;
           border-top: 1px solid #eee;
         }
-        
-        .empty-state {
-          text-align: center;
-          padding: 3rem;
-          color: #666;
-          font-size: 1.1rem;
-        }
-        
+
         @media (max-width: 768px) {
-          .filters-row {
-            grid-template-columns: 1fr;
-          }
-          
           .historias-grid {
             grid-template-columns: 1fr;
-          }
-          
-          .historia-header {
-            flex-direction: column;
-            gap: 0.5rem;
           }
         }
       `}</style>
@@ -406,8 +477,342 @@ export default function HistoriasUsuarioManager() {
   )
 }
 
-// Form Component for História de Usuário
-function HistoriaForm({ item, requisitos, onSubmit, onCancel }) {
+// Lista View Component
+function ListaView({ historias, onEdit, onDelete, getStatusBadge, getPrioridadeBadge }) {
+  return (
+    <div className="lista-container">
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Código</th>
+            <th>Título</th>
+            <th>Persona</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Data Criação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {historias.map(item => (
+            <tr key={value(item.sys_id)}>
+              <td>
+                <span className="badge badge-primary">
+                  {display(item.numero)}
+                </span>
+              </td>
+              <td>
+                <span className="badge badge-accent">
+                  {display(item.codigo)}
+                </span>
+              </td>
+              <td>
+                <strong>{display(item.titulo)}</strong>
+                <br />
+                <small className="text-muted">
+                  Como {display(item.persona)}, eu quero {display(item.acao_desejada).substring(0, 50)}...
+                </small>
+              </td>
+              <td>{display(item.persona)}</td>
+              <td>
+                <span className={`badge ${getStatusBadge(item.status)}`}>
+                  {display(item.status)}
+                </span>
+              </td>
+              <td>
+                <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                  {display(item.prioridade)}
+                </span>
+              </td>
+              <td>{new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}</td>
+              <td>
+                <div className="table-actions">
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => onEdit(item)}
+                    title="Editar"
+                  >
+                    ✏️
+                  </button>
+                  <button 
+                    className="btn btn-danger btn-sm"
+                    onClick={() => onDelete(item)}
+                    title="Excluir"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <style jsx>{`
+        .lista-container {
+          margin-top: 1.5rem;
+        }
+
+        .text-muted {
+          color: #666;
+          font-size: 0.85rem;
+        }
+
+        .table-actions {
+          display: flex;
+          gap: 0.25rem;
+        }
+
+        .table-actions .btn {
+          padding: 0.25rem 0.5rem;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Kanban View Component
+function KanbanView({ historias, onEdit, onDelete, onStatusChange, getStatusBadge, getPrioridadeBadge }) {
+  const statusColumns = [
+    { key: 'nova', label: 'Nova', color: '#6c757d' },
+    { key: 'em_andamento', label: 'Em Andamento', color: '#17a2b8' },
+    { key: 'em_teste', label: 'Em Teste', color: '#ffc107' },
+    { key: 'concluida', label: 'Concluída', color: '#28a745' },
+    { key: 'cancelada', label: 'Cancelada', color: '#dc3545' }
+  ]
+
+  const getHistoriasPorStatus = (status) => {
+    return historias.filter(item => value(item.status) === status)
+  }
+
+  const handleDragStart = (e, item) => {
+    e.dataTransfer.setData('text/plain', value(item.sys_id))
+    e.dataTransfer.setData('application/json', JSON.stringify(item))
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = (e, newStatus) => {
+    e.preventDefault()
+    try {
+      const itemData = e.dataTransfer.getData('application/json')
+      const item = JSON.parse(itemData)
+      
+      if (value(item.status) !== newStatus) {
+        onStatusChange(item, newStatus)
+      }
+    } catch (error) {
+      console.error('Erro ao processar drop:', error)
+    }
+  }
+
+  return (
+    <div className="kanban-container">
+      <div className="kanban-board">
+        {statusColumns.map(column => (
+          <div 
+            key={column.key}
+            className="kanban-column"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, column.key)}
+          >
+            <div className="column-header" style={{ backgroundColor: column.color }}>
+              <h3 className="column-title">{column.label}</h3>
+              <span className="column-count">
+                {getHistoriasPorStatus(column.key).length}
+              </span>
+            </div>
+            
+            <div className="column-content">
+              {getHistoriasPorStatus(column.key).map(item => (
+                <div
+                  key={value(item.sys_id)}
+                  className="kanban-card"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, item)}
+                >
+                  <div className="card-badges">
+                    <span className="badge badge-primary">
+                      {display(item.numero)}
+                    </span>
+                    <span className="badge badge-accent">
+                      {display(item.codigo)}
+                    </span>
+                  </div>
+                  
+                  <h4 className="card-title">{display(item.titulo)}</h4>
+                  
+                  <div className="card-story">
+                    <p><strong>Como:</strong> {display(item.persona)}</p>
+                    <p><strong>Quero:</strong> {display(item.acao_desejada).substring(0, 60)}...</p>
+                  </div>
+
+                  <div className="card-meta">
+                    <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                      {display(item.prioridade)}
+                    </span>
+                    <span className="card-date">
+                      {new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                  
+                  <div className="card-actions">
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => onEdit(item)}
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => onDelete(item)}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <style jsx>{`
+        .kanban-container {
+          margin-top: 1.5rem;
+        }
+
+        .kanban-board {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 1rem;
+          min-height: 600px;
+        }
+
+        .kanban-column {
+          background: #f8f9fa;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .column-header {
+          padding: 1rem;
+          color: white;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .column-title {
+          margin: 0;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+
+        .column-count {
+          background: rgba(255,255,255,0.2);
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.8rem;
+        }
+
+        .column-content {
+          padding: 1rem;
+          min-height: 500px;
+        }
+
+        .kanban-card {
+          background: white;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-bottom: 0.75rem;
+          box-shadow: var(--shadow-sm);
+          cursor: grab;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .kanban-card:hover {
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .kanban-card:active {
+          cursor: grabbing;
+        }
+
+        .card-badges {
+          display: flex;
+          gap: 0.25rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .card-badges .badge {
+          font-size: 0.7rem;
+          padding: 0.2rem 0.5rem;
+        }
+
+        .card-title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--primary);
+          margin: 0 0 0.75rem 0;
+          line-height: 1.3;
+        }
+
+        .card-story {
+          font-size: 0.8rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .card-story p {
+          margin: 0.25rem 0;
+          line-height: 1.3;
+        }
+
+        .card-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+        }
+
+        .card-date {
+          font-size: 0.7rem;
+          color: #666;
+        }
+
+        .card-actions {
+          display: flex;
+          gap: 0.25rem;
+          justify-content: flex-end;
+        }
+
+        .card-actions .btn {
+          padding: 0.25rem 0.5rem;
+          font-size: 0.75rem;
+        }
+
+        @media (max-width: 1200px) {
+          .kanban-board {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .kanban-board {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Form Component for Historia de Usuario
+function HistoriaForm({ item, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     codigo: item ? display(item.codigo) : '',
     titulo: item ? display(item.titulo) : '',
@@ -415,7 +820,6 @@ function HistoriaForm({ item, requisitos, onSubmit, onCancel }) {
     acao_desejada: item ? display(item.acao_desejada) : '',
     beneficio: item ? display(item.beneficio) : '',
     criterios_aceitacao: item ? display(item.criterios_aceitacao) : '',
-    requisito_relacionado: item ? value(item.requisito_relacionado) : '',
     prioridade: item ? value(item.prioridade) : 'media',
     status: item ? value(item.status) : 'nova'
   })
@@ -431,10 +835,10 @@ function HistoriaForm({ item, requisitos, onSubmit, onCancel }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal" style={{ width: '800px' }}>
+      <div className="modal" style={{ width: '800px', maxHeight: '90vh' }}>
         <div className="modal-header">
           <h2 className="modal-title">
-            {item ? 'Editar História de Usuário' : 'Nova História de Usuário'}
+            {item ? `Editar História ${display(item.numero)}` : 'Nova História de Usuário'}
           </h2>
         </div>
         
@@ -447,7 +851,7 @@ function HistoriaForm({ item, requisitos, onSubmit, onCancel }) {
                 className="form-control"
                 value={formData.codigo}
                 onChange={(e) => handleChange('codigo', e.target.value)}
-                placeholder="Ex: US-001"
+                placeholder="US-001"
                 required
               />
             </div>
@@ -463,42 +867,40 @@ function HistoriaForm({ item, requisitos, onSubmit, onCancel }) {
               />
             </div>
             
-            <div className="historia-structure">
-              <div className="form-group">
-                <label className="form-label">Como (Persona) *</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.persona}
-                  onChange={(e) => handleChange('persona', e.target.value)}
-                  placeholder="Ex: usuário administrador"
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Eu quero (Ação Desejada) *</label>
-                <textarea
-                  className="form-control"
-                  value={formData.acao_desejada}
-                  onChange={(e) => handleChange('acao_desejada', e.target.value)}
-                  placeholder="Ex: cadastrar novos usuários no sistema"
-                  required
-                  rows="2"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Para que (Benefício) *</label>
-                <textarea
-                  className="form-control"
-                  value={formData.beneficio}
-                  onChange={(e) => handleChange('beneficio', e.target.value)}
-                  placeholder="Ex: possam acessar as funcionalidades do sistema"
-                  required
-                  rows="2"
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Persona (Como...) *</label>
+              <input
+                type="text"
+                className="form-control"
+                value={formData.persona}
+                onChange={(e) => handleChange('persona', e.target.value)}
+                placeholder="cliente da CAIXA"
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Ação Desejada (Eu quero...) *</label>
+              <textarea
+                className="form-control textarea"
+                value={formData.acao_desejada}
+                onChange={(e) => handleChange('acao_desejada', e.target.value)}
+                placeholder="fazer login de forma segura no sistema"
+                required
+                rows="3"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Benefício (Para que...) *</label>
+              <textarea
+                className="form-control textarea"
+                value={formData.beneficio}
+                onChange={(e) => handleChange('beneficio', e.target.value)}
+                placeholder="eu possa acessar meus dados com segurança"
+                required
+                rows="3"
+              />
             </div>
             
             <div className="form-group">
@@ -507,25 +909,9 @@ function HistoriaForm({ item, requisitos, onSubmit, onCancel }) {
                 className="form-control textarea"
                 value={formData.criterios_aceitacao}
                 onChange={(e) => handleChange('criterios_aceitacao', e.target.value)}
-                placeholder="Descreva os critérios que definem quando esta história está completa..."
-                rows="4"
+                placeholder="DADO que... QUANDO... ENTÃO..."
+                rows="6"
               />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Requisito Relacionado</label>
-              <select
-                className="form-control form-select"
-                value={formData.requisito_relacionado}
-                onChange={(e) => handleChange('requisito_relacionado', e.target.value)}
-              >
-                <option value="">Selecionar requisito...</option>
-                {requisitos.map(req => (
-                  <option key={value(req.sys_id)} value={value(req.sys_id)}>
-                    {display(req.codigo)} - {display(req.titulo)}
-                  </option>
-                ))}
-              </select>
             </div>
             
             <div className="form-row">
@@ -569,29 +955,21 @@ function HistoriaForm({ item, requisitos, onSubmit, onCancel }) {
             </button>
           </div>
         </form>
-        
-        <style jsx>{`
-          .historia-structure {
-            background: var(--light);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border: 2px dashed var(--primary);
-          }
-          
-          .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-          }
-          
-          @media (max-width: 768px) {
-            .form-row {
-              grid-template-columns: 1fr;
-            }
-          }
-        `}</style>
       </div>
+
+      <style jsx>{`
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
     </div>
   )
 }
