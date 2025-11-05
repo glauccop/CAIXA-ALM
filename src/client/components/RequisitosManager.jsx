@@ -137,7 +137,7 @@ export default function RequisitosManager() {
     if (!necessidadeRef) return 'N/A'
     const necId = value(necessidadeRef)
     const necessidade = necessidades.find(nec => value(nec.sys_id) === necId)
-    return necessidade ? display(necessidade.titulo) : 'N/A'
+    return necessidade ? `${display(necessidade.numero)} - ${display(necessidade.titulo)}` : 'N/A'
   }
 
   if (loading && requisitos.length === 0) {
@@ -253,20 +253,21 @@ export default function RequisitosManager() {
         </div>
       </div>
 
-      {/* Visualização em Cards */}
+      {/* Visualização em Cards - Padrão Histórias de Usuário */}
       {viewMode === 'cards' && (
         <div className="requisitos-grid">
           {filteredRequisitos.map(item => (
             <div key={value(item.sys_id)} className="requisito-card">
               <div className="card-header">
-                <div className="card-title-section">
-                  <div className="numero-codigo">
-                    <span className="requisito-numero">{display(item.numero)}</span>
-                    <span className="requisito-codigo">{display(item.codigo)}</span>
-                  </div>
-                  <h3 className="requisito-titulo">{display(item.titulo)}</h3>
+                <div className="requisito-badges">
+                  <span className="badge badge-primary">
+                    {display(item.numero)}
+                  </span>
+                  <span className="badge badge-accent">
+                    {display(item.codigo)}
+                  </span>
                 </div>
-                <div className="card-badges">
+                <div className="status-badges">
                   <span className={`badge ${getTipoBadge(item.tipo)}`}>
                     {display(item.tipo)}
                   </span>
@@ -280,15 +281,21 @@ export default function RequisitosManager() {
               </div>
               
               <div className="requisito-content">
-                <p className="requisito-descricao">
-                  {display(item.descricao)}
-                </p>
-                <p className="requisito-necessidade">
-                  <strong>Necessidade:</strong> {getNecessidadeTitulo(item.necessidade_relacionada)}
-                </p>
-                <p className="requisito-data">
-                  <strong>Criado em:</strong> {formatDate(item.data_criacao)}
-                </p>
+                <h3 className="requisito-titulo">{display(item.titulo)}</h3>
+                
+                <div className="requisito-descricao-section">
+                  <p className="requisito-descricao">{display(item.descricao)}</p>
+                </div>
+
+                <div className="requisito-info">
+                  <p className="requisito-necessidade">
+                    <strong>Necessidade Relacionada:</strong><br />
+                    {getNecessidadeTitulo(item.necessidade_relacionada)}
+                  </p>
+                  <p className="requisito-data">
+                    <strong>Criado em:</strong> {formatDate(item.data_criacao)}
+                  </p>
+                </div>
               </div>
               
               <div className="card-actions">
@@ -476,6 +483,7 @@ export default function RequisitosManager() {
           margin-bottom: 0;
         }
         
+        /* Cards View - Padrão Histórias de Usuário */
         .requisitos-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
@@ -496,68 +504,54 @@ export default function RequisitosManager() {
           box-shadow: var(--shadow-lg);
         }
         
-        .card-title-section {
-          margin-bottom: 1rem;
-        }
-        
-        .numero-codigo {
+        .requisito-badges {
           display: flex;
           gap: 0.5rem;
-          margin-bottom: 0.5rem;
         }
-        
-        .requisito-numero {
-          display: inline-block;
-          background: var(--primary);
-          color: white;
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
-        }
-        
-        .requisito-codigo {
-          display: inline-block;
-          background: var(--accent);
-          color: white;
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
-        }
-        
-        .requisito-titulo {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--dark);
-          margin: 0;
-        }
-        
-        .card-badges {
+
+        .status-badges {
           display: flex;
           gap: 0.5rem;
           flex-wrap: wrap;
         }
         
-        .requisito-content {
+        .requisito-titulo {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--primary);
           margin: 1rem 0;
         }
         
-        .requisito-descricao {
-          color: var(--dark);
-          line-height: 1.5;
-          margin: 0 0 1rem 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
+        .requisito-descricao-section {
+          background: #f8f9fa;
+          padding: 1rem;
+          border-radius: 8px;
+          margin: 1rem 0;
         }
-        
-        .requisito-necessidade,
-        .requisito-data {
-          font-size: 0.85rem;
-          color: #666;
+
+        .requisito-descricao {
+          margin: 0;
+          line-height: 1.5;
+          color: var(--dark);
+        }
+
+        .requisito-info {
+          margin: 1rem 0;
+          padding: 0.75rem;
+          background: #e3f2fd;
+          border-radius: 6px;
+          font-size: 0.9rem;
+        }
+
+        .requisito-necessidade {
           margin: 0 0 0.5rem 0;
+          color: #666;
+          line-height: 1.4;
+        }
+
+        .requisito-data {
+          margin: 0;
+          color: #666;
         }
         
         .card-actions {
@@ -691,10 +685,6 @@ export default function RequisitosManager() {
           
           .requisitos-table {
             min-width: 1000px;
-          }
-          
-          .numero-codigo {
-            flex-direction: column;
           }
         }
       `}</style>

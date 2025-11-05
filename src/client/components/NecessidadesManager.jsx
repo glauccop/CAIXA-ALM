@@ -213,17 +213,18 @@ export default function NecessidadesManager() {
         </div>
       </div>
 
-      {/* Visualização em Cards */}
+      {/* Visualização em Cards - Padrão Histórias de Usuário */}
       {viewMode === 'cards' && (
         <div className="necessidades-grid">
           {filteredNecessidades.map(item => (
             <div key={value(item.sys_id)} className="necessidade-card">
               <div className="card-header">
-                <div className="card-title-section">
-                  <span className="necessidade-numero">{display(item.numero)}</span>
-                  <h3 className="necessidade-titulo">{display(item.titulo)}</h3>
+                <div className="necessidade-badges">
+                  <span className="badge badge-primary">
+                    {display(item.numero)}
+                  </span>
                 </div>
-                <div className="card-badges">
+                <div className="status-badges">
                   <span className={`badge ${getStatusBadge(item.status)}`}>
                     {display(item.status)}
                   </span>
@@ -234,12 +235,17 @@ export default function NecessidadesManager() {
               </div>
               
               <div className="necessidade-content">
-                <p className="necessidade-descricao">
-                  {display(item.descricao)}
-                </p>
-                <p className="necessidade-data">
-                  <strong>Identificada em:</strong> {formatDate(item.data_identificacao)}
-                </p>
+                <h3 className="necessidade-titulo">{display(item.titulo)}</h3>
+                
+                <div className="necessidade-descricao-section">
+                  <p className="necessidade-descricao">{display(item.descricao)}</p>
+                </div>
+
+                <div className="necessidade-info">
+                  <p className="necessidade-data">
+                    <strong>Identificada em:</strong> {formatDate(item.data_identificacao)}
+                  </p>
+                </div>
               </div>
               
               <div className="card-actions">
@@ -378,6 +384,7 @@ export default function NecessidadesManager() {
           margin-bottom: 0;
         }
         
+        /* Cards View - Padrão Histórias de Usuário */
         .necessidades-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
@@ -398,52 +405,47 @@ export default function NecessidadesManager() {
           box-shadow: var(--shadow-lg);
         }
         
-        .card-title-section {
-          margin-bottom: 1rem;
+        .necessidade-badges {
+          display: flex;
+          gap: 0.5rem;
         }
-        
-        .necessidade-numero {
-          display: inline-block;
-          background: var(--primary);
-          color: white;
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          margin-bottom: 0.5rem;
+
+        .status-badges {
+          display: flex;
+          gap: 0.5rem;
         }
         
         .necessidade-titulo {
           font-size: 1.1rem;
           font-weight: 600;
-          color: var(--dark);
-          margin: 0.5rem 0 0 0;
-        }
-        
-        .card-badges {
-          display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-        }
-        
-        .necessidade-content {
+          color: var(--primary);
           margin: 1rem 0;
         }
         
-        .necessidade-descricao {
-          color: var(--dark);
-          line-height: 1.5;
-          margin: 0 0 1rem 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
+        .necessidade-descricao-section {
+          background: #f8f9fa;
+          padding: 1rem;
+          border-radius: 8px;
+          margin: 1rem 0;
         }
-        
-        .necessidade-data {
-          font-size: 0.85rem;
-          color: #666;
+
+        .necessidade-descricao {
           margin: 0;
+          line-height: 1.5;
+          color: var(--dark);
+        }
+
+        .necessidade-info {
+          margin: 1rem 0;
+          padding: 0.75rem;
+          background: #e3f2fd;
+          border-radius: 6px;
+          font-size: 0.9rem;
+        }
+
+        .necessidade-data {
+          margin: 0;
+          color: #666;
         }
         
         .card-actions {
