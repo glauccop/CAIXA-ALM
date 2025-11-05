@@ -105,6 +105,21 @@ export default function PlanosTeste() {
     return prioridadeMap[value(prioridade)] || 'badge-secondary'
   }
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A'
+    try {
+      return new Date(display(dateStr)).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch {
+      return 'N/A'
+    }
+  }
+
   if (loading && planos.length === 0) {
     return (
       <div className="content-container">
@@ -212,6 +227,7 @@ export default function PlanosTeste() {
           onDelete={handleDelete}
           getStatusBadge={getStatusBadge}
           getPrioridadeBadge={getPrioridadeBadge}
+          formatDate={formatDate}
         />
       )}
 
@@ -474,42 +490,44 @@ function CardsView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
   )
 }
 
-// Lista View Component
-function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadge }) {
+// Lista View Component - PADRÃO APLICADO DA PÁGINA DE REQUISITOS
+function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadge, formatDate }) {
   return (
-    <div className="lista-container">
-      <table className="data-table">
+    <div className="planos-table-container">
+      <table className="planos-table">
         <thead>
           <tr>
             <th>Número</th>
             <th>Código</th>
             <th>Título</th>
             <th>Descrição</th>
-            <th>Status</th>
             <th>Prioridade</th>
+            <th>Status</th>
             <th>Data Criação</th>
+            <th>Data Execução</th>
             <th>Ações</th>
           </tr>
         </thead>
         <tbody>
           {planos.map(item => (
             <tr key={value(item.sys_id)}>
-              <td>
-                <span className="badge badge-primary">
-                  {display(item.numero)}
-                </span>
+              <td className="numero-cell">
+                <strong>{display(item.numero)}</strong>
+              </td>
+              <td className="codigo-cell">
+                <span className="codigo-badge">{display(item.codigo)}</span>
+              </td>
+              <td className="titulo-cell">
+                {display(item.titulo)}
+              </td>
+              <td className="descricao-cell">
+                <div className="descricao-truncated">
+                  {display(item.descricao)}
+                </div>
               </td>
               <td>
-                <span className="badge badge-accent">
-                  {display(item.codigo)}
-                </span>
-              </td>
-              <td>
-                <strong>{display(item.titulo)}</strong>
-              </td>
-              <td>
-                <span className="text-truncate">
-                  {display(item.descricao).substring(0, 80)}...
+                <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                  {display(item.prioridade)}
                 </span>
               </td>
               <td>
@@ -517,29 +535,27 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
                   {display(item.status)}
                 </span>
               </td>
-              <td>
-                <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
-                  {display(item.prioridade)}
-                </span>
+              <td className="data-cell">
+                {formatDate(item.data_criacao)}
               </td>
-              <td>{new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}</td>
-              <td>
-                <div className="table-actions">
-                  <button 
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => onEdit(item)}
-                    title="Editar"
-                  >
-                    ✏️
-                  </button>
-                  <button 
-                    className="btn btn-danger btn-sm"
-                    onClick={() => onDelete(item)}
-                    title="Excluir"
-                  >
-                    🗑️
-                  </button>
-                </div>
+              <td className="data-cell">
+                {formatDate(item.data_execucao)}
+              </td>
+              <td className="actions-cell">
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => onEdit(item)}
+                  title="Editar"
+                >
+                  ✏️
+                </button>
+                <button 
+                  className="btn btn-danger btn-sm"
+                  onClick={() => onDelete(item)}
+                  title="Excluir"
+                >
+                  🗑️
+                </button>
               </td>
             </tr>
           ))}
@@ -547,22 +563,97 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
       </table>
 
       <style jsx>{`
-        .lista-container {
+        /* Estilos aplicados da página de Requisitos */
+        .planos-table-container {
           margin-top: 1.5rem;
+          background: white;
+          border-radius: 12px;
+          box-shadow: var(--shadow-md);
+          overflow: hidden;
         }
-
-        .text-truncate {
-          color: #666;
+        
+        .planos-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        
+        .planos-table th {
+          background: var(--primary);
+          color: white;
+          padding: 1rem;
+          text-align: left;
+          font-weight: 600;
           font-size: 0.9rem;
         }
-
-        .table-actions {
-          display: flex;
-          gap: 0.25rem;
+        
+        .planos-table td {
+          padding: 1rem;
+          border-bottom: 1px solid #eee;
+          vertical-align: top;
+        }
+        
+        .planos-table tbody tr:hover {
+          background: #f8f9fa;
+        }
+        
+        .numero-cell {
+          min-width: 120px;
+          font-family: monospace;
+        }
+        
+        .codigo-cell {
+          min-width: 80px;
+        }
+        
+        .codigo-badge {
+          background: var(--accent);
+          color: white;
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+        
+        .titulo-cell {
+          min-width: 200px;
+          font-weight: 600;
+          color: var(--primary);
+        }
+        
+        .descricao-cell {
+          max-width: 250px;
+        }
+        
+        .descricao-truncated {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          line-height: 1.4;
+        }
+        
+        .data-cell {
+          min-width: 130px;
+          font-size: 0.85rem;
+          color: #666;
+        }
+        
+        .actions-cell {
+          min-width: 100px;
+        }
+        
+        .actions-cell .btn {
+          margin-right: 0.25rem;
         }
 
-        .table-actions .btn {
-          padding: 0.25rem 0.5rem;
+        @media (max-width: 768px) {
+          .planos-table-container {
+            overflow-x: auto;
+          }
+          
+          .planos-table {
+            min-width: 1100px;
+          }
         }
       `}</style>
     </div>
@@ -602,6 +693,19 @@ function PlanoTesteForm({ item, onSubmit, onCancel }) {
         
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
+            {item && (
+              <div className="form-group">
+                <label className="form-label">Número</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={display(item.numero)}
+                  disabled
+                  style={{ background: '#f8f9fa', color: '#666' }}
+                />
+              </div>
+            )}
+
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Código *</label>

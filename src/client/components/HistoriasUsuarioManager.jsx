@@ -115,6 +115,21 @@ export default function HistoriasUsuarioManager() {
     return prioridadeMap[value(prioridade)] || 'badge-secondary'
   }
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A'
+    try {
+      return new Date(display(dateStr)).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch {
+      return 'N/A'
+    }
+  }
+
   if (loading && historias.length === 0) {
     return (
       <div className="content-container">
@@ -228,6 +243,7 @@ export default function HistoriasUsuarioManager() {
           onDelete={handleDelete}
           getStatusBadge={getStatusBadge}
           getPrioridadeBadge={getPrioridadeBadge}
+          formatDate={formatDate}
         />
       )}
 
@@ -492,19 +508,19 @@ function CardsView({ historias, onEdit, onDelete, getStatusBadge, getPrioridadeB
   )
 }
 
-// Lista View Component
-function ListaView({ historias, onEdit, onDelete, getStatusBadge, getPrioridadeBadge }) {
+// Lista View Component - APLICANDO O PADRÃO DA PÁGINA DE REQUISITOS
+function ListaView({ historias, onEdit, onDelete, getStatusBadge, getPrioridadeBadge, formatDate }) {
   return (
-    <div className="lista-container">
-      <table className="data-table">
+    <div className="historias-table-container">
+      <table className="historias-table">
         <thead>
           <tr>
             <th>Número</th>
             <th>Código</th>
             <th>Título</th>
-            <th>Persona</th>
-            <th>Status</th>
+            <th>História</th>
             <th>Prioridade</th>
+            <th>Status</th>
             <th>Data Criação</th>
             <th>Ações</th>
           </tr>
@@ -512,52 +528,52 @@ function ListaView({ historias, onEdit, onDelete, getStatusBadge, getPrioridadeB
         <tbody>
           {historias.map(item => (
             <tr key={value(item.sys_id)}>
-              <td>
-                <span className="badge badge-primary">
-                  {display(item.numero)}
-                </span>
+              <td className="numero-cell">
+                <strong>{display(item.numero)}</strong>
               </td>
-              <td>
-                <span className="badge badge-accent">
-                  {display(item.codigo)}
-                </span>
+              <td className="codigo-cell">
+                <span className="codigo-badge">{display(item.codigo)}</span>
               </td>
-              <td>
-                <strong>{display(item.titulo)}</strong>
-                <br />
-                <small className="text-muted">
-                  Como {display(item.persona)}, eu quero {display(item.acao_desejada).substring(0, 50)}...
-                </small>
+              <td className="titulo-cell">
+                {display(item.titulo)}
               </td>
-              <td>{display(item.persona)}</td>
-              <td>
-                <span className={`badge ${getStatusBadge(item.status)}`}>
-                  {display(item.status)}
-                </span>
+              <td className="historia-cell">
+                <div className="historia-truncated">
+                  <strong>Como:</strong> {display(item.persona)}
+                  <br />
+                  <strong>Quero:</strong> {display(item.acao_desejada).substring(0, 50)}...
+                  <br />
+                  <strong>Para:</strong> {display(item.beneficio).substring(0, 50)}...
+                </div>
               </td>
               <td>
                 <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
                   {display(item.prioridade)}
                 </span>
               </td>
-              <td>{new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}</td>
               <td>
-                <div className="table-actions">
-                  <button 
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => onEdit(item)}
-                    title="Editar"
-                  >
-                    ✏️
-                  </button>
-                  <button 
-                    className="btn btn-danger btn-sm"
-                    onClick={() => onDelete(item)}
-                    title="Excluir"
-                  >
-                    🗑️
-                  </button>
-                </div>
+                <span className={`badge ${getStatusBadge(item.status)}`}>
+                  {display(item.status)}
+                </span>
+              </td>
+              <td className="data-cell">
+                {formatDate(item.data_criacao)}
+              </td>
+              <td className="actions-cell">
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => onEdit(item)}
+                  title="Editar"
+                >
+                  ✏️
+                </button>
+                <button 
+                  className="btn btn-danger btn-sm"
+                  onClick={() => onDelete(item)}
+                  title="Excluir"
+                >
+                  🗑️
+                </button>
               </td>
             </tr>
           ))}
@@ -565,22 +581,98 @@ function ListaView({ historias, onEdit, onDelete, getStatusBadge, getPrioridadeB
       </table>
 
       <style jsx>{`
-        .lista-container {
+        /* Estilos para visualização em lista - APLICANDO O PADRÃO DE REQUISITOS */
+        .historias-table-container {
           margin-top: 1.5rem;
+          background: white;
+          border-radius: 12px;
+          box-shadow: var(--shadow-md);
+          overflow: hidden;
         }
-
-        .text-muted {
-          color: #666;
+        
+        .historias-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        
+        .historias-table th {
+          background: var(--primary);
+          color: white;
+          padding: 1rem;
+          text-align: left;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+        
+        .historias-table td {
+          padding: 1rem;
+          border-bottom: 1px solid #eee;
+          vertical-align: top;
+        }
+        
+        .historias-table tbody tr:hover {
+          background: #f8f9fa;
+        }
+        
+        .numero-cell {
+          min-width: 120px;
+          font-family: monospace;
+        }
+        
+        .codigo-cell {
+          min-width: 80px;
+        }
+        
+        .codigo-badge {
+          background: var(--accent);
+          color: white;
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+        
+        .titulo-cell {
+          min-width: 200px;
+          font-weight: 600;
+          color: var(--primary);
+        }
+        
+        .historia-cell {
+          max-width: 300px;
+        }
+        
+        .historia-truncated {
+          line-height: 1.4;
           font-size: 0.85rem;
         }
 
-        .table-actions {
-          display: flex;
-          gap: 0.25rem;
+        .historia-truncated strong {
+          color: var(--primary);
+        }
+        
+        .data-cell {
+          min-width: 130px;
+          font-size: 0.85rem;
+          color: #666;
+        }
+        
+        .actions-cell {
+          min-width: 100px;
+        }
+        
+        .actions-cell .btn {
+          margin-right: 0.25rem;
         }
 
-        .table-actions .btn {
-          padding: 0.25rem 0.5rem;
+        @media (max-width: 768px) {
+          .historias-table-container {
+            overflow-x: auto;
+          }
+          
+          .historias-table {
+            min-width: 1000px;
+          }
         }
       `}</style>
     </div>
