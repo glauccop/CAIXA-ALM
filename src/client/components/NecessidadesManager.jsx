@@ -114,8 +114,15 @@ export default function NecessidadesManager() {
   return (
     <div className="content-container">
       <div className="page-header">
-        <h1 className="page-title">Necessidades</h1>
-        <p className="page-subtitle">Cadastro e gestão de necessidades identificadas</p>
+        <div className="page-title-section">
+          <h1 className="page-title">Necessidades</h1>
+          <p className="page-subtitle">Cadastro e gestão de necessidades identificadas</p>
+        </div>
+        <div className="page-actions">
+          <button className="btn btn-primary" onClick={handleCreate}>
+            ➕ Nova Necessidade
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -127,10 +134,7 @@ export default function NecessidadesManager() {
 
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">Filtros e Busca </h2>
-          <button className="btn btn-primary" onClick={handleCreate}>
-            ➕ Nova Necessidade
-          </button>
+          <h2 className="card-title">Filtros e Busca</h2>
         </div>
         
         <div className="filters-row">
@@ -236,6 +240,34 @@ export default function NecessidadesManager() {
       )}
 
       <style jsx>{`
+        .page-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 2rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #eee;
+        }
+        
+        .page-title-section {
+          flex: 1;
+        }
+        
+        .page-actions {
+          display: flex;
+          align-items: center;
+          margin-left: 2rem;
+        }
+        
+        .page-title {
+          margin: 0 0 0.5rem 0;
+        }
+        
+        .page-subtitle {
+          margin: 0;
+          color: #666;
+        }
+        
         .filters-row {
           display: grid;
           grid-template-columns: 2fr 1fr 1fr;
@@ -319,6 +351,16 @@ export default function NecessidadesManager() {
         }
         
         @media (max-width: 768px) {
+          .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          
+          .page-actions {
+            margin-left: 0;
+            margin-top: 1rem;
+          }
+          
           .filters-row {
             grid-template-columns: 1fr;
           }
