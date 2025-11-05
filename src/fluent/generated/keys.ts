@@ -96,26 +96,56 @@ declare global {
                     'req-001': {
                         table: 'x_snc_almcaixa_requisitos'
                         id: 'b4e01a684f8943638c7d72f4e021fd93'
+                        deleted: true
                     }
                     'req-002': {
                         table: 'x_snc_almcaixa_requisitos'
                         id: '877802d5c21746a7b548674489ca53ad'
+                        deleted: true
                     }
                     'req-003': {
                         table: 'x_snc_almcaixa_requisitos'
                         id: '170c8a25f4494bce9c60190401c40953'
+                        deleted: true
                     }
                     'req-004': {
                         table: 'x_snc_almcaixa_requisitos'
                         id: '71486eac2b294356947e92e67a2961b5'
+                        deleted: true
                     }
                     'req-005': {
                         table: 'x_snc_almcaixa_requisitos'
                         id: '54a03b8ce0904d03a644fe65ff9e10c6'
+                        deleted: true
                     }
                     'req-006': {
                         table: 'x_snc_almcaixa_requisitos'
                         id: 'ac66d9e519674729bddec12c6009c462'
+                        deleted: true
+                    }
+                    requisito_001: {
+                        table: 'x_snc_almcaixa_requisitos'
+                        id: 'f91069e43a2e47e29044900c8b8c7331'
+                    }
+                    requisito_002: {
+                        table: 'x_snc_almcaixa_requisitos'
+                        id: '068fa9c9b6d0472582475a7bc3c84c52'
+                    }
+                    requisito_003: {
+                        table: 'x_snc_almcaixa_requisitos'
+                        id: '4514aed3461545c095aa37250cf5c965'
+                    }
+                    requisito_004: {
+                        table: 'x_snc_almcaixa_requisitos'
+                        id: 'd6405d214337459fa3cbe95e04592844'
+                    }
+                    requisito_005: {
+                        table: 'x_snc_almcaixa_requisitos'
+                        id: 'e19979d3cf654477b34d5ea6d77dec9a'
+                    }
+                    requisito_006: {
+                        table: 'x_snc_almcaixa_requisitos'
+                        id: '71ee1f2bc9064bdfb967bde8eda3ddf9'
                     }
                     'requisitos-manager-page': {
                         table: 'sys_ui_page'
@@ -167,6 +197,15 @@ declare global {
                     },
                     {
                         table: 'sys_documentation'
+                        id: '067276d38a5a4340ba744b62c90c6a00'
+                        key: {
+                            name: 'x_snc_almcaixa_requisitos'
+                            element: 'numero'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
                         id: '067f5a4f887044f3b039aba7bbf85446'
                         key: {
                             name: 'x_snc_almcaixa_incident'
@@ -190,6 +229,14 @@ declare global {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'prioridade'
                             value: 'baixa'
+                        }
+                    },
+                    {
+                        table: 'sys_number'
+                        id: '0c5d124990f74361b2e879c5ef60b559'
+                        key: {
+                            category: 'x_snc_almcaixa_requisitos'
+                            prefix: 'REQ'
                         }
                     },
                     {
@@ -1188,6 +1235,14 @@ declare global {
                         key: {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'historia_relacionada'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'd04aa4c7c9214c789db10d85ac051e67'
+                        key: {
+                            name: 'x_snc_almcaixa_requisitos'
+                            element: 'numero'
                         }
                     },
                     {

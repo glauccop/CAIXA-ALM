@@ -6,6 +6,12 @@ export const x_snc_almcaixa_requisitos = Table({
     name: 'x_snc_almcaixa_requisitos',
     label: 'Requisitos',
     schema: {
+        numero: StringColumn({ 
+            label: 'Número',
+            maxLength: 40,
+            read_only: true,
+            default: 'javascript:global.getNextObjNumberPadded();'
+        }),
         codigo: StringColumn({
             label: 'Código',
             maxLength: 50,
@@ -74,4 +80,9 @@ export const x_snc_almcaixa_requisitos = Table({
     caller_access: 'tracking',
     actions: ['create', 'read', 'update', 'delete'],
     allow_web_service_access: true,
+    auto_number: {
+        prefix: 'REQ',
+        number: 1000000,
+        number_of_digits: 7
+    }
 })
