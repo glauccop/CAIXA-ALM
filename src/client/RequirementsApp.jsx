@@ -58,7 +58,17 @@ export default function RequirementsApp() {
       <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <div className="logo">
-            <span className="logo-icon">🏛️</span>
+            <img 
+              src="https://nowdemo.service-now.com/caixa-logo.png" 
+              alt="CAIXA"
+              className="logo-icon"
+              onError={(e) => {
+                // Fallback caso a imagem não carregue
+                e.target.style.display = 'none'
+                e.target.nextSibling.style.display = 'inline-block'
+              }}
+            />
+            <span className="logo-fallback" style={{ display: 'none' }}>🏛️</span>
             {!sidebarCollapsed && <span className="logo-text">CAIXA ALM</span>}
           </div>
           <button 
