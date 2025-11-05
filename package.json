@@ -1,0 +1,21 @@
+{
+  "name": "x-snc-caixa-alm",
+  "version": "1.0.0",
+  "description": "Ciclo de Vida das Aplicações Caixa",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "now-sdk build",
+    "deploy": "now-sdk install",
+    "transform": "now-sdk transform",
+    "types": "now-sdk dependencies"
+  },
+  "devDependencies": {
+    "@servicenow/sdk": "4.0.2",
+    "@servicenow/glide": "26.0.1",
+    "eslint": "8.50.0",
+    "@servicenow/eslint-plugin-sdk-app-plugin": "4.0.2",
+    "@servicenow/isomorphic-rollup": "^1.2.1",
+    "react": "19.x",
+    "react-dom": "19.x"
+  }
+}
