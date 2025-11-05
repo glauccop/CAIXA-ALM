@@ -145,7 +145,7 @@ export default function HistoriasUsuarioManager() {
       )}
 
       <div className="card">
-        <div className="card-header">
+        <div className="filters-header">
           <h2 className="card-title">Filtros e Visualização</h2>
           <div className="view-toggles">
             <button 
@@ -275,6 +275,15 @@ export default function HistoriasUsuarioManager() {
           align-items: center;
         }
 
+        .filters-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 1rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #eee;
+        }
+
         .view-toggles {
           display: flex;
           gap: 0.5rem;
@@ -311,6 +320,12 @@ export default function HistoriasUsuarioManager() {
 
           .page-actions .btn {
             flex: 1;
+          }
+
+          .filters-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
           }
 
           .filters-row {

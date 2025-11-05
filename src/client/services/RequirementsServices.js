@@ -122,7 +122,7 @@ export class HistoriasUsuarioService extends BaseService {
 }
 
 // Service for Planos de Teste
-export class PlanostesteService extends BaseService {
+export class PlanosTesteService extends BaseService {
   constructor() {
     super('x_snc_almcaixa_planos_teste')
   }

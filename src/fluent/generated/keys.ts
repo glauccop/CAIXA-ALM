@@ -101,22 +101,47 @@ declare global {
                     'plan-001': {
                         table: 'x_snc_almcaixa_planos_teste'
                         id: 'd0cdffafd2d641dc859c2f9677e8bb6c'
+                        deleted: true
                     }
                     'plan-002': {
                         table: 'x_snc_almcaixa_planos_teste'
                         id: 'be99da89103242d092af9cffad1b7e86'
+                        deleted: true
                     }
                     'plan-003': {
                         table: 'x_snc_almcaixa_planos_teste'
                         id: '20c70eede203410ca94350586f1407e8'
+                        deleted: true
                     }
                     'plan-004': {
                         table: 'x_snc_almcaixa_planos_teste'
                         id: 'eda1579e45344eb189a950ef3b1332d5'
+                        deleted: true
                     }
                     'plan-005': {
                         table: 'x_snc_almcaixa_planos_teste'
                         id: '5aad99d6503d4c8fbd3269af0fc94d36'
+                        deleted: true
+                    }
+                    plano_teste_001: {
+                        table: 'x_snc_almcaixa_planos_teste'
+                        id: '18fe5318c1b746ec8a1556d5607264c8'
+                    }
+                    plano_teste_002: {
+                        table: 'x_snc_almcaixa_planos_teste'
+                        id: '2629e3bda9ab45c8a4203bb993e2c222'
+                    }
+                    plano_teste_003: {
+                        table: 'x_snc_almcaixa_planos_teste'
+                        id: '78b17140d783446e9d4238c3dba18161'
+                    }
+                    plano_teste_004: {
+                        table: 'x_snc_almcaixa_planos_teste'
+                        id: '162710e1440c40bca4e423e838adf7c8'
+                    }
+                    plano_teste_005: {
+                        table: 'x_snc_almcaixa_planos_teste'
+                        id: '89ae90a1f59c4ce89cbb5079e7553383'
                     }
                     'req-001': {
                         table: 'x_snc_almcaixa_requisitos'
@@ -218,6 +243,14 @@ declare global {
                             name: 'x_snc_almcaixa_requisitos'
                             element: 'tipo'
                             value: 'nao_funcional'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '0499144b02244758b459c6748cb730e7'
+                        key: {
+                            name: 'x_snc_almcaixa_planos_teste'
+                            element: 'numero'
                         }
                     },
                     {
@@ -815,6 +848,14 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_number'
+                        id: '7679f2cd7b834d1a97a7861ea490dcac'
+                        key: {
+                            category: 'x_snc_almcaixa_planos_teste'
+                            prefix: 'TES'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: '769bf7210a6e4295a6138839b3c1cabe'
                         key: {
@@ -1105,6 +1146,15 @@ declare global {
                         key: {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'status'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'a6f73b32fa6a42d7a73321910c79eabc'
+                        key: {
+                            name: 'x_snc_almcaixa_planos_teste'
+                            element: 'numero'
                             language: 'en'
                         }
                     },

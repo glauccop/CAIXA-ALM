@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { PlanostesteService, HistoriasUsuarioService } from '../services/RequirementsServices.js'
+import { PlanosTesteService } from '../services/RequirementsServices.js'
 import { display, value } from '../utils/fields.js'
 
 export default function PlanosTeste() {
   const [planos, setPlanos] = useState([])
-  const [historias, setHistorias] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [selectedItem, setSelectedItem] = useState(null)
@@ -12,22 +11,18 @@ export default function PlanosTeste() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterPrioridade, setFilterPrioridade] = useState('')
+  const [viewMode, setViewMode] = useState('cards') // 'cards', 'lista'
 
-  const planoService = useMemo(() => new PlanostesteService(), [])
-  const historiaService = useMemo(() => new HistoriasUsuarioService(), [])
+  const service = useMemo(() => new PlanosTesteService(), [])
 
   const refreshData = async () => {
     try {
       setLoading(true)
       setError(null)
-      const [planData, histData] = await Promise.all([
-        planoService.list(),
-        historiaService.list()
-      ])
-      setPlanos(planData)
-      setHistorias(histData)
+      const data = await service.list()
+      setPlanos(data)
     } catch (err) {
-      setError('Falha ao carregar dados: ' + (err.message || 'Erro desconhecido'))
+      setError('Falha ao carregar planos de teste: ' + (err.message || 'Erro desconhecido'))
       console.error(err)
     } finally {
       setLoading(false)
@@ -53,10 +48,10 @@ export default function PlanosTeste() {
     
     try {
       const sysId = value(item.sys_id)
-      await planoService.delete(sysId)
+      await service.delete(sysId)
       await refreshData()
     } catch (err) {
-      setError('Falha ao excluir plano: ' + (err.message || 'Erro desconhecido'))
+      setError('Falha ao excluir plano de teste: ' + (err.message || 'Erro desconhecido'))
     }
   }
 
@@ -65,36 +60,37 @@ export default function PlanosTeste() {
       setLoading(true)
       if (selectedItem) {
         const sysId = value(selectedItem.sys_id)
-        await planoService.update(sysId, formData)
+        await service.update(sysId, formData)
       } else {
-        await planoService.create(formData)
+        await service.create(formData)
       }
       setShowForm(false)
       await refreshData()
     } catch (err) {
-      setError('Falha ao salvar plano: ' + (err.message || 'Erro desconhecido'))
+      setError('Falha ao salvar plano de teste: ' + (err.message || 'Erro desconhecido'))
     } finally {
       setLoading(false)
     }
   }
 
   const filteredPlanos = planos.filter(item => {
-    const searchMatch = display(item.titulo).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       display(item.codigo).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       display(item.descricao).toLowerCase().includes(searchTerm.toLowerCase())
-    const statusMatch = !filterStatus || display(item.status) === filterStatus
-    const prioridadeMatch = !filterPrioridade || display(item.prioridade) === filterPrioridade
+    const matchesSearch = display(item.titulo).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         display(item.codigo).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         display(item.numero).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         display(item.descricao).toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = !filterStatus || display(item.status) === filterStatus
+    const matchesPrioridade = !filterPrioridade || display(item.prioridade) === filterPrioridade
     
-    return searchMatch && statusMatch && prioridadeMatch
+    return matchesSearch && matchesStatus && matchesPrioridade
   })
 
   const getStatusBadge = (status) => {
     const statusMap = {
       'planejado': 'badge-secondary',
-      'em_execucao': 'badge-warning',
+      'em_execucao': 'badge-info',
       'passou': 'badge-success',
       'falhou': 'badge-danger',
-      'bloqueado': 'badge-info'
+      'bloqueado': 'badge-warning'
     }
     return statusMap[value(status)] || 'badge-secondary'
   }
@@ -103,7 +99,7 @@ export default function PlanosTeste() {
     const prioridadeMap = {
       'critica': 'badge-danger',
       'alta': 'badge-warning',
-      'media': 'badge-info',
+      'media': 'badge-info', 
       'baixa': 'badge-secondary'
     }
     return prioridadeMap[value(prioridade)] || 'badge-secondary'
@@ -119,9 +115,16 @@ export default function PlanosTeste() {
 
   return (
     <div className="content-container">
-      <div className="page-header">
-        <h1 className="page-title">Planos de Teste</h1>
-        <p className="page-subtitle">Definição de casos de teste com pré-condições, passos e resultados esperados</p>
+      <div className="page-header-wrapper">
+        <div className="page-title-section">
+          <h1 className="page-title">Planos de Teste</h1>
+          <p className="page-subtitle">Definição de casos de teste com pré-condições, passos e resultados esperados</p>
+        </div>
+        <div className="page-actions">
+          <button className="btn btn-primary" onClick={handleCreate}>
+            ➕ Novo Plano de Teste
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -132,11 +135,22 @@ export default function PlanosTeste() {
       )}
 
       <div className="card">
-        <div className="card-header">
+        <div className="filters-header">
           <h2 className="card-title">Filtros e Busca</h2>
-          <button className="btn btn-primary" onClick={handleCreate}>
-            ➕ Novo Plano de Teste
-          </button>
+          <div className="view-toggles">
+            <button 
+              className={`btn ${viewMode === 'cards' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setViewMode('cards')}
+            >
+              📊 Cards
+            </button>
+            <button 
+              className={`btn ${viewMode === 'lista' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setViewMode('lista')}
+            >
+              📋 Lista
+            </button>
+          </div>
         </div>
         
         <div className="filters-row">
@@ -144,7 +158,7 @@ export default function PlanosTeste() {
             <input
               type="text"
               className="form-control"
-              placeholder="Buscar por código, título ou descrição..."
+              placeholder="Buscar por título, código, número ou descrição..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -181,85 +195,25 @@ export default function PlanosTeste() {
         </div>
       </div>
 
-      <div className="planos-grid">
-        {filteredPlanos.map(item => (
-          <div key={value(item.sys_id)} className="plano-card">
-            <div className="card-header">
-              <div className="plano-header">
-                <span className="plano-codigo">{display(item.codigo)}</span>
-                <div className="card-badges">
-                  <span className={`badge ${getStatusBadge(item.status)}`}>
-                    {display(item.status)}
-                  </span>
-                  <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
-                    {display(item.prioridade)}
-                  </span>
-                </div>
-              </div>
-              <h3 className="plano-titulo">{display(item.titulo)}</h3>
-            </div>
-            
-            <div className="plano-content">
-              <div className="plano-descricao">
-                <p><strong>Descrição:</strong> {display(item.descricao)}</p>
-              </div>
-              
-              {item.pre_condicoes && display(item.pre_condicoes) && (
-                <div className="plano-section">
-                  <p><strong>Pré-condições:</strong></p>
-                  <p className="section-content">{display(item.pre_condicoes)}</p>
-                </div>
-              )}
-              
-              <div className="plano-section">
-                <p><strong>Passos do Teste:</strong></p>
-                <div className="section-content expandable">
-                  {display(item.passos_teste)}
-                </div>
-              </div>
-              
-              <div className="plano-section">
-                <p><strong>Resultado Esperado:</strong></p>
-                <div className="section-content expected-result">
-                  {display(item.resultado_esperado)}
-                </div>
-              </div>
-              
-              {item.historia_relacionada && display(item.historia_relacionada) && (
-                <p className="plano-historia">
-                  <strong>História Relacionada:</strong> {display(item.historia_relacionada)}
-                </p>
-              )}
-              
-              <div className="plano-dates">
-                <p className="plano-data">
-                  <strong>Criado em:</strong> {new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}
-                </p>
-                {item.data_execucao && display(item.data_execucao) && (
-                  <p className="plano-data">
-                    <strong>Executado em:</strong> {new Date(display(item.data_execucao)).toLocaleDateString('pt-BR')}
-                  </p>
-                )}
-              </div>
-            </div>
-            
-            <div className="card-actions">
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => handleEdit(item)}
-              >
-                ✏️ Editar
-              </button>
-              <button 
-                className="btn btn-danger btn-sm"
-                onClick={() => handleDelete(item)}
-              >
-                🗑️ Excluir
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {viewMode === 'cards' && (
+        <CardsView
+          planos={filteredPlanos}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          getStatusBadge={getStatusBadge}
+          getPrioridadeBadge={getPrioridadeBadge}
+        />
+      )}
+
+      {viewMode === 'lista' && (
+        <ListaView
+          planos={filteredPlanos}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          getStatusBadge={getStatusBadge}
+          getPrioridadeBadge={getPrioridadeBadge}
+        />
+      )}
 
       {filteredPlanos.length === 0 && !loading && (
         <div className="empty-state">
@@ -268,25 +222,173 @@ export default function PlanosTeste() {
       )}
 
       {showForm && (
-        <PlanoForm
+        <PlanoTesteForm
           item={selectedItem}
-          historias={historias}
           onSubmit={handleFormSubmit}
           onCancel={() => setShowForm(false)}
         />
       )}
 
       <style jsx>{`
+        .page-header-wrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 2rem;
+          gap: 2rem;
+        }
+
+        .page-title-section {
+          flex: 1;
+        }
+
+        .page-actions {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+
+        .filters-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 1rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #eee;
+        }
+
+        .view-toggles {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .view-toggles .btn {
+          padding: 0.5rem 1rem;
+          font-size: 0.85rem;
+        }
+
         .filters-row {
           display: grid;
           grid-template-columns: 2fr 1fr 1fr;
           gap: 1rem;
           margin-bottom: 0;
         }
-        
+
+        .empty-state {
+          text-align: center;
+          padding: 3rem;
+          color: #666;
+          font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+          .page-header-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .page-actions {
+            justify-content: stretch;
+          }
+
+          .page-actions .btn {
+            flex: 1;
+          }
+
+          .filters-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+          }
+
+          .filters-row {
+            grid-template-columns: 1fr;
+          }
+
+          .view-toggles {
+            justify-content: center;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Cards View Component
+function CardsView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadge }) {
+  return (
+    <div className="planos-grid">
+      {planos.map(item => (
+        <div key={value(item.sys_id)} className="plano-card">
+          <div className="card-header">
+            <div className="plano-badges">
+              <span className="badge badge-primary">
+                {display(item.numero)}
+              </span>
+              <span className="badge badge-accent">
+                {display(item.codigo)}
+              </span>
+            </div>
+            <div className="status-badges">
+              <span className={`badge ${getStatusBadge(item.status)}`}>
+                {display(item.status)}
+              </span>
+              <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                {display(item.prioridade)}
+              </span>
+            </div>
+          </div>
+          
+          <div className="plano-content">
+            <h3 className="plano-titulo">{display(item.titulo)}</h3>
+            <p className="plano-descricao">{display(item.descricao)}</p>
+
+            {display(item.pre_condicoes) && (
+              <div className="plano-section">
+                <strong>Pré-condições:</strong>
+                <p>{display(item.pre_condicoes).substring(0, 100)}...</p>
+              </div>
+            )}
+
+            <div className="plano-section">
+              <strong>Passos do Teste:</strong>
+              <p>{display(item.passos_teste).substring(0, 150)}...</p>
+            </div>
+
+            <div className="plano-section">
+              <strong>Resultado Esperado:</strong>
+              <p>{display(item.resultado_esperado).substring(0, 100)}...</p>
+            </div>
+
+            <div className="plano-dates">
+              <p><strong>Criado em:</strong> {new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}</p>
+              {display(item.data_execucao) && (
+                <p><strong>Executado em:</strong> {new Date(display(item.data_execucao)).toLocaleDateString('pt-BR')}</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="card-actions">
+            <button 
+              className="btn btn-secondary btn-sm"
+              onClick={() => onEdit(item)}
+            >
+              ✏️ Editar
+            </button>
+            <button 
+              className="btn btn-danger btn-sm"
+              onClick={() => onDelete(item)}
+            >
+              🗑️ Excluir
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <style jsx>{`
         .planos-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
           gap: 1.5rem;
           margin-top: 1.5rem;
         }
@@ -297,7 +399,6 @@ export default function PlanosTeste() {
           box-shadow: var(--shadow-md);
           padding: 1.5rem;
           transition: transform 0.2s, box-shadow 0.2s;
-          border-left: 4px solid var(--success);
         }
         
         .plano-card:hover {
@@ -305,86 +406,53 @@ export default function PlanosTeste() {
           box-shadow: var(--shadow-lg);
         }
         
-        .plano-header {
+        .plano-badges {
           display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 0.5rem;
+          gap: 0.5rem;
         }
-        
-        .plano-codigo {
-          background: var(--success);
-          color: var(--white);
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-          font-size: 0.8rem;
-          font-weight: 600;
+
+        .status-badges {
+          display: flex;
+          gap: 0.5rem;
         }
         
         .plano-titulo {
           font-size: 1.1rem;
           font-weight: 600;
           color: var(--primary);
-          margin: 0.5rem 0 1rem 0;
-        }
-        
-        .card-badges {
-          display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-        }
-        
-        .plano-content {
           margin: 1rem 0;
         }
         
         .plano-descricao {
-          margin-bottom: 1rem;
+          color: var(--dark);
+          line-height: 1.5;
+          margin: 0 0 1rem 0;
         }
-        
+
         .plano-section {
           margin: 1rem 0;
-          padding: 1rem;
-          background: var(--light);
-          border-radius: 8px;
-          border-left: 3px solid var(--info);
-        }
-        
-        .section-content {
-          margin: 0.5rem 0 0 0;
-          color: #333;
-          line-height: 1.5;
-        }
-        
-        .expandable {
-          max-height: 100px;
-          overflow-y: auto;
-          white-space: pre-wrap;
-        }
-        
-        .expected-result {
-          background: rgba(40, 167, 69, 0.1);
           padding: 0.75rem;
+          background: #f8f9fa;
           border-radius: 6px;
-          border: 1px solid rgba(40, 167, 69, 0.2);
-        }
-        
-        .plano-historia {
           font-size: 0.9rem;
-          color: #666;
-          margin: 1rem 0 0.5rem 0;
         }
-        
+
+        .plano-section p {
+          margin: 0.5rem 0 0 0;
+          color: #666;
+          line-height: 1.4;
+        }
+
         .plano-dates {
-          margin-top: 1rem;
+          margin: 1rem 0 0 0;
           padding-top: 1rem;
           border-top: 1px solid #eee;
         }
-        
-        .plano-data {
+
+        .plano-dates p {
           font-size: 0.85rem;
           color: #666;
-          margin: 0 0 0.25rem 0;
+          margin: 0.25rem 0;
         }
         
         .card-actions {
@@ -395,26 +463,10 @@ export default function PlanosTeste() {
           padding-top: 1rem;
           border-top: 1px solid #eee;
         }
-        
-        .empty-state {
-          text-align: center;
-          padding: 3rem;
-          color: #666;
-          font-size: 1.1rem;
-        }
-        
+
         @media (max-width: 768px) {
-          .filters-row {
-            grid-template-columns: 1fr;
-          }
-          
           .planos-grid {
             grid-template-columns: 1fr;
-          }
-          
-          .plano-header {
-            flex-direction: column;
-            gap: 0.5rem;
           }
         }
       `}</style>
@@ -422,13 +474,107 @@ export default function PlanosTeste() {
   )
 }
 
+// Lista View Component
+function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadge }) {
+  return (
+    <div className="lista-container">
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Código</th>
+            <th>Título</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Data Criação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {planos.map(item => (
+            <tr key={value(item.sys_id)}>
+              <td>
+                <span className="badge badge-primary">
+                  {display(item.numero)}
+                </span>
+              </td>
+              <td>
+                <span className="badge badge-accent">
+                  {display(item.codigo)}
+                </span>
+              </td>
+              <td>
+                <strong>{display(item.titulo)}</strong>
+              </td>
+              <td>
+                <span className="text-truncate">
+                  {display(item.descricao).substring(0, 80)}...
+                </span>
+              </td>
+              <td>
+                <span className={`badge ${getStatusBadge(item.status)}`}>
+                  {display(item.status)}
+                </span>
+              </td>
+              <td>
+                <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                  {display(item.prioridade)}
+                </span>
+              </td>
+              <td>{new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}</td>
+              <td>
+                <div className="table-actions">
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => onEdit(item)}
+                    title="Editar"
+                  >
+                    ✏️
+                  </button>
+                  <button 
+                    className="btn btn-danger btn-sm"
+                    onClick={() => onDelete(item)}
+                    title="Excluir"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <style jsx>{`
+        .lista-container {
+          margin-top: 1.5rem;
+        }
+
+        .text-truncate {
+          color: #666;
+          font-size: 0.9rem;
+        }
+
+        .table-actions {
+          display: flex;
+          gap: 0.25rem;
+        }
+
+        .table-actions .btn {
+          padding: 0.25rem 0.5rem;
+        }
+      `}</style>
+    </div>
+  )
+}
+
 // Form Component for Plano de Teste
-function PlanoForm({ item, historias, onSubmit, onCancel }) {
+function PlanoTesteForm({ item, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     codigo: item ? display(item.codigo) : '',
     titulo: item ? display(item.titulo) : '',
     descricao: item ? display(item.descricao) : '',
-    historia_relacionada: item ? value(item.historia_relacionada) : '',
     pre_condicoes: item ? display(item.pre_condicoes) : '',
     passos_teste: item ? display(item.passos_teste) : '',
     resultado_esperado: item ? display(item.resultado_esperado) : '',
@@ -450,7 +596,7 @@ function PlanoForm({ item, historias, onSubmit, onCancel }) {
       <div className="modal" style={{ width: '900px', maxHeight: '90vh' }}>
         <div className="modal-header">
           <h2 className="modal-title">
-            {item ? 'Editar Plano de Teste' : 'Novo Plano de Teste'}
+            {item ? `Editar Plano de Teste ${display(item.numero)}` : 'Novo Plano de Teste'}
           </h2>
         </div>
         
@@ -464,43 +610,27 @@ function PlanoForm({ item, historias, onSubmit, onCancel }) {
                   className="form-control"
                   value={formData.codigo}
                   onChange={(e) => handleChange('codigo', e.target.value)}
-                  placeholder="Ex: TC-001"
+                  placeholder="TC-001"
                   required
                 />
               </div>
               
               <div className="form-group">
-                <label className="form-label">História Relacionada</label>
-                <select
-                  className="form-control form-select"
-                  value={formData.historia_relacionada}
-                  onChange={(e) => handleChange('historia_relacionada', e.target.value)}
-                >
-                  <option value="">Selecionar história...</option>
-                  {historias.map(hist => (
-                    <option key={value(hist.sys_id)} value={value(hist.sys_id)}>
-                      {display(hist.codigo)} - {display(hist.titulo)}
-                    </option>
-                  ))}
-                </select>
+                <label className="form-label">Título *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.titulo}
+                  onChange={(e) => handleChange('titulo', e.target.value)}
+                  required
+                />
               </div>
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Título *</label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.titulo}
-                onChange={(e) => handleChange('titulo', e.target.value)}
-                required
-              />
             </div>
             
             <div className="form-group">
               <label className="form-label">Descrição *</label>
               <textarea
-                className="form-control"
+                className="form-control textarea"
                 value={formData.descricao}
                 onChange={(e) => handleChange('descricao', e.target.value)}
                 required
@@ -511,11 +641,11 @@ function PlanoForm({ item, historias, onSubmit, onCancel }) {
             <div className="form-group">
               <label className="form-label">Pré-condições</label>
               <textarea
-                className="form-control"
+                className="form-control textarea"
                 value={formData.pre_condicoes}
                 onChange={(e) => handleChange('pre_condicoes', e.target.value)}
-                placeholder="Descreva as condições necessárias antes de executar o teste..."
-                rows="3"
+                placeholder="- Condição 1&#10;- Condição 2&#10;- Condição 3"
+                rows="4"
               />
             </div>
             
@@ -525,7 +655,7 @@ function PlanoForm({ item, historias, onSubmit, onCancel }) {
                 className="form-control textarea"
                 value={formData.passos_teste}
                 onChange={(e) => handleChange('passos_teste', e.target.value)}
-                placeholder="1. Primeiro passo&#10;2. Segundo passo&#10;3. Terceiro passo..."
+                placeholder="1. Primeiro passo&#10;2. Segundo passo&#10;3. Terceiro passo"
                 required
                 rows="6"
               />
@@ -534,12 +664,12 @@ function PlanoForm({ item, historias, onSubmit, onCancel }) {
             <div className="form-group">
               <label className="form-label">Resultado Esperado *</label>
               <textarea
-                className="form-control"
+                className="form-control textarea"
                 value={formData.resultado_esperado}
                 onChange={(e) => handleChange('resultado_esperado', e.target.value)}
-                placeholder="Descreva o resultado esperado após executar todos os passos..."
+                placeholder="- Resultado 1&#10;- Resultado 2&#10;- Resultado 3"
                 required
-                rows="3"
+                rows="4"
               />
             </div>
             
@@ -580,25 +710,25 @@ function PlanoForm({ item, historias, onSubmit, onCancel }) {
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary">
-              {item ? 'Salvar Alterações' : 'Criar Plano'}
+              {item ? 'Salvar Alterações' : 'Criar Plano de Teste'}
             </button>
           </div>
         </form>
-        
-        <style jsx>{`
-          .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-          }
-          
-          @media (max-width: 768px) {
-            .form-row {
-              grid-template-columns: 1fr;
-            }
-          }
-        `}</style>
       </div>
+
+      <style jsx>{`
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
     </div>
   )
 }
