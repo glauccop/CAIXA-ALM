@@ -36,18 +36,38 @@ declare global {
                     'nec-001': {
                         table: 'x_snc_almcaixa_necessidades'
                         id: '0a1c2182387e48dca90e2e1a0dd4928c'
+                        deleted: true
                     }
                     'nec-002': {
                         table: 'x_snc_almcaixa_necessidades'
                         id: '0a5d0491b6f74182b1a3fce8f816632f'
+                        deleted: true
                     }
                     'nec-003': {
                         table: 'x_snc_almcaixa_necessidades'
                         id: '00b4ed902de04d128ba35aa967575987'
+                        deleted: true
                     }
                     'nec-004': {
                         table: 'x_snc_almcaixa_necessidades'
                         id: '55991da2d452414aa559ca8c36c74efd'
+                        deleted: true
+                    }
+                    necessidade_001: {
+                        table: 'x_snc_almcaixa_necessidades'
+                        id: '9aa62b1f5a714abc86928d0847d6aa3a'
+                    }
+                    necessidade_002: {
+                        table: 'x_snc_almcaixa_necessidades'
+                        id: 'd987c0d7580b4c1c964001f4dcb2070e'
+                    }
+                    necessidade_003: {
+                        table: 'x_snc_almcaixa_necessidades'
+                        id: 'c5dd5d087f0e43ec97efda6c2a4d1e61'
+                    }
+                    necessidade_004: {
+                        table: 'x_snc_almcaixa_necessidades'
+                        id: 'b2a9179c356443bf80fab2984943081f'
                     }
                     package_json: {
                         table: 'sys_module'

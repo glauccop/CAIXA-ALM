@@ -11,6 +11,7 @@ export default function NecessidadesManager() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterPrioridade, setFilterPrioridade] = useState('')
+  const [viewMode, setViewMode] = useState('cards') // 'cards' or 'list'
 
   const service = useMemo(() => new NecessidadesService(), [])
 
@@ -74,7 +75,8 @@ export default function NecessidadesManager() {
 
   const filteredNecessidades = necessidades.filter(item => {
     const matchesSearch = display(item.titulo).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         display(item.descricao).toLowerCase().includes(searchTerm.toLowerCase())
+                         display(item.descricao).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         display(item.numero).toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = !filterStatus || display(item.status) === filterStatus
     const matchesPrioridade = !filterPrioridade || display(item.prioridade) === filterPrioridade
     
@@ -101,6 +103,21 @@ export default function NecessidadesManager() {
       'baixa': 'badge-secondary'
     }
     return prioridadeMap[value(prioridade)] || 'badge-secondary'
+  }
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A'
+    try {
+      return new Date(display(dateStr)).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch {
+      return 'N/A'
+    }
   }
 
   if (loading && necessidades.length === 0) {
@@ -134,7 +151,23 @@ export default function NecessidadesManager() {
 
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">Filtros e Busca</h2>
+          <div className="filters-section">
+            <h2 className="card-title">Filtros e Busca</h2>
+            <div className="view-toggle">
+              <button 
+                className={`btn btn-sm ${viewMode === 'cards' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setViewMode('cards')}
+              >
+                📊 Cards
+              </button>
+              <button 
+                className={`btn btn-sm ${viewMode === 'list' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setViewMode('list')}
+              >
+                📋 Lista
+              </button>
+            </div>
+          </div>
         </div>
         
         <div className="filters-row">
@@ -142,7 +175,7 @@ export default function NecessidadesManager() {
             <input
               type="text"
               className="form-control"
-              placeholder="Buscar por título ou descrição..."
+              placeholder="Buscar por número, título ou descrição..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -180,50 +213,118 @@ export default function NecessidadesManager() {
         </div>
       </div>
 
-      <div className="necessidades-grid">
-        {filteredNecessidades.map(item => (
-          <div key={value(item.sys_id)} className="necessidade-card">
-            <div className="card-header">
-              <h3 className="necessidade-titulo">{display(item.titulo)}</h3>
-              <div className="card-badges">
-                <span className={`badge ${getStatusBadge(item.status)}`}>
-                  {display(item.status)}
-                </span>
-                <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
-                  {display(item.prioridade)}
-                </span>
+      {/* Visualização em Cards */}
+      {viewMode === 'cards' && (
+        <div className="necessidades-grid">
+          {filteredNecessidades.map(item => (
+            <div key={value(item.sys_id)} className="necessidade-card">
+              <div className="card-header">
+                <div className="card-title-section">
+                  <span className="necessidade-numero">{display(item.numero)}</span>
+                  <h3 className="necessidade-titulo">{display(item.titulo)}</h3>
+                </div>
+                <div className="card-badges">
+                  <span className={`badge ${getStatusBadge(item.status)}`}>
+                    {display(item.status)}
+                  </span>
+                  <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                    {display(item.prioridade)}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="necessidade-content">
+                <p className="necessidade-descricao">
+                  {display(item.descricao)}
+                </p>
+                <p className="necessidade-data">
+                  <strong>Identificada em:</strong> {formatDate(item.data_identificacao)}
+                </p>
+              </div>
+              
+              <div className="card-actions">
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => handleEdit(item)}
+                >
+                  ✏️ Editar
+                </button>
+                <button 
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDelete(item)}
+                >
+                  🗑️ Excluir
+                </button>
               </div>
             </div>
-            
-            <div className="necessidade-content">
-              <p className="necessidade-numero">
-                <strong>Número:</strong> {display(item.numero)}
-              </p>
-              <p className="necessidade-descricao">
-                {display(item.descricao)}
-              </p>
-              <p className="necessidade-data">
-                <strong>Identificada em:</strong> {new Date(display(item.data_identificacao)).toLocaleDateString('pt-BR')}
-              </p>
-            </div>
-            
-            <div className="card-actions">
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => handleEdit(item)}
-              >
-                ✏️ Editar
-              </button>
-              <button 
-                className="btn btn-danger btn-sm"
-                onClick={() => handleDelete(item)}
-              >
-                🗑️ Excluir
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* Visualização em Lista */}
+      {viewMode === 'list' && (
+        <div className="necessidades-table-container">
+          <table className="necessidades-table">
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Título</th>
+                <th>Descrição</th>
+                <th>Prioridade</th>
+                <th>Status</th>
+                <th>Data Identificação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredNecessidades.map(item => (
+                <tr key={value(item.sys_id)}>
+                  <td className="numero-cell">
+                    <strong>{display(item.numero)}</strong>
+                  </td>
+                  <td className="titulo-cell">
+                    {display(item.titulo)}
+                  </td>
+                  <td className="descricao-cell">
+                    <div className="descricao-truncated">
+                      {display(item.descricao)}
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                      {display(item.prioridade)}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge ${getStatusBadge(item.status)}`}>
+                      {display(item.status)}
+                    </span>
+                  </td>
+                  <td className="data-cell">
+                    {formatDate(item.data_identificacao)}
+                  </td>
+                  <td className="actions-cell">
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => handleEdit(item)}
+                      title="Editar"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDelete(item)}
+                      title="Excluir"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {filteredNecessidades.length === 0 && !loading && (
         <div className="empty-state">
@@ -246,26 +347,28 @@ export default function NecessidadesManager() {
           align-items: flex-start;
           margin-bottom: 2rem;
           padding-bottom: 1rem;
-          border-bottom: 1px solid #eee;
+          border-bottom: 2px solid #f0f2f5;
         }
         
-        .page-title-section {
-          flex: 1;
-        }
-        
-        .page-actions {
-          display: flex;
-          align-items: center;
-          margin-left: 2rem;
-        }
-        
-        .page-title {
+        .page-title-section h1 {
           margin: 0 0 0.5rem 0;
         }
         
-        .page-subtitle {
+        .page-title-section p {
           margin: 0;
           color: #666;
+        }
+        
+        .filters-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
+        
+        .view-toggle {
+          display: flex;
+          gap: 0.5rem;
         }
         
         .filters-row {
@@ -277,7 +380,7 @@ export default function NecessidadesManager() {
         
         .necessidades-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
           gap: 1.5rem;
           margin-top: 1.5rem;
         }
@@ -295,11 +398,26 @@ export default function NecessidadesManager() {
           box-shadow: var(--shadow-lg);
         }
         
+        .card-title-section {
+          margin-bottom: 1rem;
+        }
+        
+        .necessidade-numero {
+          display: inline-block;
+          background: var(--primary);
+          color: white;
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+        
         .necessidade-titulo {
           font-size: 1.1rem;
           font-weight: 600;
-          color: var(--primary);
-          margin: 0 0 1rem 0;
+          color: var(--dark);
+          margin: 0.5rem 0 0 0;
         }
         
         .card-badges {
@@ -310,12 +428,6 @@ export default function NecessidadesManager() {
         
         .necessidade-content {
           margin: 1rem 0;
-        }
-        
-        .necessidade-numero {
-          font-size: 0.9rem;
-          color: #666;
-          margin: 0 0 0.5rem 0;
         }
         
         .necessidade-descricao {
@@ -343,6 +455,76 @@ export default function NecessidadesManager() {
           border-top: 1px solid #eee;
         }
         
+        /* Estilos para visualização em lista */
+        .necessidades-table-container {
+          margin-top: 1.5rem;
+          background: white;
+          border-radius: 12px;
+          box-shadow: var(--shadow-md);
+          overflow: hidden;
+        }
+        
+        .necessidades-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        
+        .necessidades-table th {
+          background: var(--primary);
+          color: white;
+          padding: 1rem;
+          text-align: left;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+        
+        .necessidades-table td {
+          padding: 1rem;
+          border-bottom: 1px solid #eee;
+          vertical-align: top;
+        }
+        
+        .necessidades-table tbody tr:hover {
+          background: #f8f9fa;
+        }
+        
+        .numero-cell {
+          min-width: 120px;
+          font-family: monospace;
+        }
+        
+        .titulo-cell {
+          min-width: 200px;
+          font-weight: 600;
+          color: var(--primary);
+        }
+        
+        .descricao-cell {
+          max-width: 300px;
+        }
+        
+        .descricao-truncated {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          line-height: 1.4;
+        }
+        
+        .data-cell {
+          min-width: 130px;
+          font-size: 0.85rem;
+          color: #666;
+        }
+        
+        .actions-cell {
+          min-width: 100px;
+        }
+        
+        .actions-cell .btn {
+          margin-right: 0.25rem;
+        }
+        
         .empty-state {
           text-align: center;
           padding: 3rem;
@@ -353,12 +535,13 @@ export default function NecessidadesManager() {
         @media (max-width: 768px) {
           .page-header {
             flex-direction: column;
-            align-items: flex-start;
+            gap: 1rem;
           }
           
-          .page-actions {
-            margin-left: 0;
-            margin-top: 1rem;
+          .filters-section {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
           }
           
           .filters-row {
@@ -367,6 +550,14 @@ export default function NecessidadesManager() {
           
           .necessidades-grid {
             grid-template-columns: 1fr;
+          }
+          
+          .necessidades-table-container {
+            overflow-x: auto;
+          }
+          
+          .necessidades-table {
+            min-width: 800px;
           }
         }
       `}</style>
@@ -397,12 +588,25 @@ function NecessidadeForm({ item, onSubmit, onCancel }) {
       <div className="modal" style={{ width: '600px' }}>
         <div className="modal-header">
           <h2 className="modal-title">
-            {item ? 'Editar Necessidade' : 'Nova Necessidade'}
+            {item ? `Editar Necessidade ${display(item.numero)}` : 'Nova Necessidade'}
           </h2>
         </div>
         
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
+            {item && (
+              <div className="form-group">
+                <label className="form-label">Número</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={display(item.numero)}
+                  disabled
+                  style={{ background: '#f8f9fa', color: '#666' }}
+                />
+              </div>
+            )}
+            
             <div className="form-group">
               <label className="form-label">Título *</label>
               <input

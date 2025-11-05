@@ -62,7 +62,7 @@ export const x_snc_almcaixa_necessidades = Table({
     allow_web_service_access: true,
     auto_number: {
         prefix: 'NEC',
-        number: 1000,
+        number: 1000000,
         number_of_digits: 7
     }
 })
