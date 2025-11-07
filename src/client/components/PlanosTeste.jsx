@@ -549,22 +549,21 @@ function CardsView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
   )
 }
 
-// Lista View Component
+// Lista View Component - APLICANDO EXATAMENTE O PADRÃO DAS HISTÓRIAS DE USUÁRIO
 function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadge, formatDate }) {
   return (
     <div className="planos-table-container">
       <table className="planos-table">
         <thead>
           <tr>
-            <th>Número</th>
-            <th>Código</th>
-            <th>Título</th>
-            <th>Descrição</th>
-            <th>Prioridade</th>
-            <th>Status</th>
-            <th>Data Criação</th>
-            <th>Data Execução</th>
-            <th>Ações</th>
+            <th style={{ width: '120px' }}>Número</th>
+            <th style={{ width: '100px' }}>Código</th>
+            <th style={{ width: '200px' }}>Título</th>
+            <th style={{ width: '350px' }}>Detalhes do Teste</th>
+            <th style={{ width: '120px' }}>Prioridade</th>
+            <th style={{ width: '140px' }}>Status</th>
+            <th style={{ width: '150px' }}>Data Criação</th>
+            <th style={{ width: '120px' }}>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -577,28 +576,33 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
                 <span className="codigo-badge">{display(item.codigo)}</span>
               </td>
               <td className="titulo-cell">
-                {display(item.titulo)}
-              </td>
-              <td className="descricao-cell">
-                <div className="descricao-truncated">
-                  {display(item.descricao)}
+                <div className="titulo-text">
+                  {display(item.titulo)}
                 </div>
               </td>
-              <td>
+              <td className="detalhes-cell">
+                <div className="detalhes-truncated">
+                  <strong>Descrição:</strong> {display(item.descricao).substring(0, 80)}...
+                  <br />
+                  <strong>Passos:</strong> {display(item.passos_teste).substring(0, 60)}...
+                  <br />
+                  <strong>Esperado:</strong> {display(item.resultado_esperado).substring(0, 60)}...
+                </div>
+              </td>
+              <td className="prioridade-cell">
                 <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
                   {display(item.prioridade)}
                 </span>
               </td>
-              <td>
+              <td className="status-cell">
                 <span className={`badge ${getStatusBadge(item.status)}`}>
                   {display(item.status)}
                 </span>
               </td>
               <td className="data-cell">
-                {formatDate(item.data_criacao)}
-              </td>
-              <td className="data-cell">
-                {formatDate(item.data_execucao)}
+                <div className="data-text">
+                  {formatDate(item.data_criacao)}
+                </div>
               </td>
               <td className="actions-cell">
                 <button 
@@ -633,6 +637,7 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
         .planos-table {
           width: 100%;
           border-collapse: collapse;
+          table-layout: fixed;
         }
         
         .planos-table th {
@@ -642,12 +647,16 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
           text-align: left;
           font-weight: 600;
           font-size: 0.9rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         
         .planos-table td {
           padding: 1rem;
           border-bottom: 1px solid #eee;
           vertical-align: top;
+          overflow: hidden;
         }
         
         .planos-table tbody tr:hover {
@@ -655,12 +664,14 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
         }
         
         .numero-cell {
-          min-width: 120px;
+          width: 120px;
           font-family: monospace;
+          white-space: nowrap;
         }
         
         .codigo-cell {
-          min-width: 80px;
+          width: 100px;
+          text-align: center;
         }
         
         .codigo-badge {
@@ -670,34 +681,78 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
           border-radius: 12px;
           font-size: 0.75rem;
           font-weight: 600;
+          white-space: nowrap;
+          display: inline-block;
         }
         
         .titulo-cell {
-          min-width: 200px;
+          width: 200px;
+        }
+
+        .titulo-text {
           font-weight: 600;
           color: var(--primary);
-        }
-        
-        .descricao-cell {
-          max-width: 250px;
-        }
-        
-        .descricao-truncated {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
+          word-wrap: break-word;
+          line-height: 1.3;
+          max-height: 3.9rem;
           overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+        }
+        
+        .detalhes-cell {
+          width: 350px;
+        }
+        
+        .detalhes-truncated {
           line-height: 1.4;
+          font-size: 0.85rem;
+          max-height: 4.2rem;
+          overflow: hidden;
+        }
+
+        .detalhes-truncated strong {
+          color: var(--primary);
+        }
+
+        .prioridade-cell {
+          width: 120px;
+          text-align: center;
+        }
+
+        .prioridade-cell .badge {
+          white-space: nowrap;
+          min-width: 60px;
+          text-align: center;
+        }
+
+        .status-cell {
+          width: 140px;
+          text-align: center;
+        }
+
+        .status-cell .badge {
+          white-space: nowrap;
+          min-width: 80px;
+          text-align: center;
         }
         
         .data-cell {
-          min-width: 130px;
+          width: 150px;
+        }
+
+        .data-text {
           font-size: 0.85rem;
           color: #666;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         
         .actions-cell {
-          min-width: 100px;
+          width: 120px;
+          text-align: center;
         }
         
         .actions-cell .btn {
@@ -710,7 +765,8 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
           }
           
           .planos-table {
-            min-width: 1100px;
+            min-width: 1300px;
+            table-layout: auto;
           }
         }
       `}</style>
