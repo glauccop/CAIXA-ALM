@@ -4,6 +4,7 @@ import NecessidadesManager from './components/NecessidadesManager.jsx'
 import RequisitosManager from './components/RequisitosManager.jsx'
 import HistoriasUsuarioManager from './components/HistoriasUsuarioManager.jsx'
 import PlanosTeste from './components/PlanosTeste.jsx'
+import ChangeRequestManager from './components/ChangeRequestManager.jsx'
 import './RequirementsApp.css'
 
 export default function RequirementsApp() {
@@ -36,6 +37,7 @@ export default function RequirementsApp() {
     { id: 'requisitos', label: 'Requisitos', icon: '📋' },
     { id: 'historias', label: 'Histórias de Usuário', icon: '👤' },
     { id: 'planos-teste', label: 'Planos de Teste', icon: '🧪' },
+    { id: 'change-requests', label: 'Change Requests', icon: '🔄' },
   ]
 
   const renderView = () => {
@@ -48,6 +50,8 @@ export default function RequirementsApp() {
         return <HistoriasUsuarioManager />
       case 'planos-teste':
         return <PlanosTeste />
+      case 'change-requests':
+        return <ChangeRequestManager />
       default:
         return <Dashboard />
     }

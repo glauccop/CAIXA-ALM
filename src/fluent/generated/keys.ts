@@ -9,6 +9,14 @@ declare global {
                         table: 'sys_module'
                         id: '0db14774b9ff4ac6be4543280b282d71'
                     }
+                    crq_approval_date: {
+                        table: 'sys_script'
+                        id: '11e972260a914226810a5a6f02fc6c2f'
+                    }
+                    crq_validate_implemented: {
+                        table: 'sys_script'
+                        id: 'd75d00a8014d4766bcde40b24a43d156'
+                    }
                     'hist-001': {
                         table: 'x_snc_almcaixa_historias_usuario'
                         id: 'c23b8160d08e47edaa13f8b6da1d3919'
@@ -201,6 +209,42 @@ declare global {
                         table: 'sys_ui_page'
                         id: '637f718a2ab54f8bb76e53bbf94bf732'
                     }
+                    sample_crq_001: {
+                        table: 'x_snc_almcaixa_change_request'
+                        id: '43892c6927be42418fd1f16b5e218d0e'
+                    }
+                    sample_crq_002: {
+                        table: 'x_snc_almcaixa_change_request'
+                        id: '0342ddb8fff541b2ba25a442d44880ae'
+                    }
+                    sample_crq_003: {
+                        table: 'x_snc_almcaixa_change_request'
+                        id: 'edec78c259c64f0b8ba472cea55ffae6'
+                    }
+                    sample_crq_004: {
+                        table: 'x_snc_almcaixa_change_request'
+                        id: '94161b2947454699846177ced6e5553f'
+                    }
+                    sample_crq_005: {
+                        table: 'x_snc_almcaixa_change_request'
+                        id: '1958b87b36d7464db721dd8b9c125cff'
+                    }
+                    sample_crq_006: {
+                        table: 'x_snc_almcaixa_change_request'
+                        id: 'c7b7ee22947c485c811018e521a0bc1f'
+                    }
+                    sample_crq_007: {
+                        table: 'x_snc_almcaixa_change_request'
+                        id: 'ec603b41ab6240fbb5dfb0da51dcc9a1'
+                    }
+                    'src_server_change-request-approval_js': {
+                        table: 'sys_module'
+                        id: 'f7dddd2904d74445a46f1777342feccc'
+                    }
+                    'src_server_validate-implemented-cr_js': {
+                        table: 'sys_module'
+                        id: '08f602e8a9134dcfb86226bd2001afa3'
+                    }
                     'x_snc_almcaixa/____insertStyle-BxBLo9PM': {
                         table: 'sys_ux_lib_asset'
                         id: '5f43d3f71fbe45d3b13260cd695fb9e3'
@@ -233,6 +277,15 @@ declare global {
                         key: {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'titulo'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '00e12dd4b77f4474901d6189238e6989'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_schedule'
                             language: 'en'
                         }
                     },
@@ -273,6 +326,24 @@ declare global {
                     },
                     {
                         table: 'sys_choice'
+                        id: '074644b03e2548498d9a54f6d9d39ab8'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'change_type'
+                            value: 'escopo'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '081e5671873241cba45dba0966aa04df'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'created_on'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
                         id: '0843d25552da4eca8e0417ffbc631d41'
                         key: {
                             name: 'x_snc_almcaixa_historias_usuario'
@@ -287,6 +358,15 @@ declare global {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'prioridade'
                             value: 'baixa'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '09fa8664815041d1984d27b0f783c501'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                            value: 'proposed'
                         }
                     },
                     {
@@ -324,6 +404,15 @@ declare global {
                     },
                     {
                         table: 'sys_documentation'
+                        id: '0eec35e09b0e4b29a4397806063bed3b'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'approval_date'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
                         id: '163e39ec8c7044e3991f0cf5aa716af0'
                         key: {
                             name: 'x_snc_almcaixa_historias_usuario'
@@ -332,11 +421,38 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: '168a1f70f6f54bf7bae273d95274d2e1'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                            value: 'cancelled'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '1977ea33e14347d7bd83cf981ee40256'
                         key: {
                             name: 'x_snc_almcaixa_historias_usuario'
                             element: 'codigo'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '19f147fef4224227888cff5e18e445ae'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'related_need'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '19f332be9a824616b99807c2adace69a'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'change_type'
+                            value: 'urgente'
                         }
                     },
                     {
@@ -385,12 +501,28 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_dictionary'
+                        id: '22ba83f755194eb0a429cab26847306b'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_cost'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: '24f9e7a31a1b4dfe9177d6d86d2b80fe'
                         key: {
                             name: 'x_snc_almcaixa_requisitos'
                             element: 'status'
                             value: 'rascunho'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '25ae597c769546768734e292d5bfe98c'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'approval_date'
                         }
                     },
                     {
@@ -408,6 +540,15 @@ declare global {
                         key: {
                             name: 'x_snc_almcaixa_necessidades'
                             element: 'descricao'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '2d5cab2cb632495f91d30022264d81af'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                            value: 'implemented'
                         }
                     },
                     {
@@ -433,6 +574,15 @@ declare global {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'status'
                             value: 'em_execucao'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '310f74aafe3e409b83d9d63939e75955'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'description'
+                            language: 'en'
                         }
                     },
                     {
@@ -495,6 +645,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '401661c37b174715bbbba54fc6a5f3e9'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_scope'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: '410fd64f2d6a4804919f0869f7656678'
                         key: {
@@ -510,6 +669,23 @@ declare global {
                             name: 'x_snc_almcaixa_requisitos'
                             element: 'prioridade'
                             value: 'baixa'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '4335106901dd489a8901cd025087a38a'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'related_story'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '45a83945772e48ffaf7a8d2e41f0cf5d'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'change_type'
+                            language: 'en'
                         }
                     },
                     {
@@ -572,6 +748,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '4cd43fe57d7f4466bef6feed73c65e00'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'reason_for_change'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '4dfe2bc4490e403582d709e63062b4b5'
                         key: {
@@ -621,6 +806,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: '5cbd1933f736483484f1ddd3d91f6e50'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                            value: 'in_analysis'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '5de5a606887742b3b38314170ebd7b7b'
                         key: {
@@ -665,6 +859,23 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '6205ce73ac92487cb7869a6de053c03e'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'updated_on'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '6253b475e70846b29620c1cdff296b1e'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_scope'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '627966b1ff24444dace9839e63665bd1'
                         key: {
@@ -679,6 +890,14 @@ declare global {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'data_criacao'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '65d157643c6e4d498985cebd4df25527'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'number'
                         }
                     },
                     {
@@ -780,12 +999,28 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_db_object'
+                        id: '70feefa9d8ae4febb99f60310bff3516'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: '7140b93e60474a9f84e92a32478ad4f1'
                         key: {
                             name: 'x_snc_almcaixa_historias_usuario'
                             element: 'prioridade'
                             value: 'baixa'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '737ced35bdd6456aae26ec8ee94e85d4'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'related_story'
+                            language: 'en'
                         }
                     },
                     {
@@ -900,6 +1135,24 @@ declare global {
                     },
                     {
                         table: 'sys_documentation'
+                        id: '7aaab92088c5462cb047466ef006c5b8'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'related_test'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '7b57d66a6b32425bad54617e80a41b38'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_scope'
+                            value: 'alto'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
                         id: '7c283cb4b2744e0e824447f151d8846a'
                         key: {
                             name: 'x_snc_almcaixa_requisitos'
@@ -935,6 +1188,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '80eb0c0d4bb645f6a9db7dbe7b2f6c22'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: '82409620afa64d809528c10f7fd8f020'
                         key: {
@@ -962,10 +1224,26 @@ declare global {
                     },
                     {
                         table: 'sys_dictionary'
+                        id: '84685dcb55c74d0eb23843797e5289f5'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'reason_for_change'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
                         id: '8572da0191864e3abce9909b3d12dfa8'
                         key: {
                             name: 'x_snc_almcaixa_requisitos'
                             element: 'data_criacao'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '879e46878be44a86b28058a89d8a8a40'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'related_requirement'
                         }
                     },
                     {
@@ -1003,11 +1281,28 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: '912443d4f320452097df6b53b2d80db9'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'related_requirement'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '92e6070ede874e6e8161fd6a80e89009'
                         key: {
                             name: 'x_snc_almcaixa_historias_usuario'
                             element: 'data_criacao'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '9307c03337e341c782d85cf529613ac5'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'requested_by'
                         }
                     },
                     {
@@ -1054,6 +1349,13 @@ declare global {
                         }
                     },
                     {
+                        table: 'ua_table_licensing_config'
+                        id: '994fa418538440198abd3903cf00bd1a'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '996dcfe714034284a51f21d292dd0dae'
                         key: {
@@ -1077,6 +1379,15 @@ declare global {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'resultado_esperado'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: '9f2862db21e643a2b26ef8ef95dcc502'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'change_type'
+                            value: 'melhoria'
                         }
                     },
                     {
@@ -1223,6 +1534,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: 'b2bde5375797467abac1e7b2dc00ed30'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'number'
+                            language: 'en'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: 'b56e9104c5274b85b1db419936091354'
                         key: {
@@ -1256,10 +1576,35 @@ declare global {
                     },
                     {
                         table: 'sys_dictionary'
+                        id: 'bccee39bef99420384c0bbd890de5c9c'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'change_type'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
                         id: 'bde306b8acbe4ef5af2de12ece592f85'
                         key: {
                             name: 'x_snc_almcaixa_necessidades'
                             element: 'numero'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'be4672dae78b43d9a254879c048a0883'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_scope'
+                            value: 'medio'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'bf4c885440d94c9a8e9823cf7a5da795'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'short_description'
                         }
                     },
                     {
@@ -1279,11 +1624,45 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'c1c44620b08c400eb2830125f02f68aa'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                            value: 'approved'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: 'c32e2993d89743d8963349a6d5c7f1a5'
                         key: {
                             name: 'x_snc_almcaixa_requisitos'
                             element: 'data_atualizacao'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'c3a2af0d0e4b40d7804131f89407e407'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'created_on'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'c4077380ac1c43899f845b8d6e671de8'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'change_type'
+                            value: 'correcao'
+                        }
+                    },
+                    {
+                        table: 'sys_number'
+                        id: 'c480fae917264c23bb12c4a5d6c45bb7'
+                        key: {
+                            category: 'x_snc_almcaixa_change_request'
+                            prefix: 'CRQ'
                         }
                     },
                     {
@@ -1381,6 +1760,23 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_documentation'
+                        id: 'd70c465ca1f74948b43b21bffddb4ab7'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'short_description'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'd725d5f91b1042f3ac1dc593ca485b0c'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'updated_on'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: 'd76fae54ef2849bda6163f3745591a67'
                         key: {
@@ -1432,6 +1828,40 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'dc0fca55be284d9c80236ae1acf73443'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                            value: 'pending_approval'
+                        }
+                    },
+                    {
+                        table: 'sys_choice'
+                        id: 'dc38858f41c54552a4224e2043ffced1'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                            value: 'rejected'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'dc80aa820cb0491f8d2e9f608c7889bd'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'status'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'dcb0965d5f1b43e8ac135d90d2d88302'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'related_test'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'dce60ce0ff104f97a56c24834c214408'
                         key: {
@@ -1446,6 +1876,15 @@ declare global {
                         key: {
                             name: 'x_snc_almcaixa_incident'
                             element: 'number'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'ddf0c92d11ec43cea4aa1e5957a8c059'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'NULL'
                             language: 'en'
                         }
                     },
@@ -1473,6 +1912,15 @@ declare global {
                         key: {
                             name: 'x_snc_almcaixa_historias_usuario'
                             element: 'requisito_relacionado'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'e4d3da129b4f49928350df28f902a9d4'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_cost'
                             language: 'en'
                         }
                     },
@@ -1521,12 +1969,29 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_dictionary'
+                        id: 'e727c0f049814134b26b98453af93910'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'NULL'
+                        }
+                    },
+                    {
                         table: 'sys_choice'
                         id: 'e73bdaec76434d0999368715adeebdef'
                         key: {
                             name: 'x_snc_almcaixa_incident'
                             element: 'priority'
                             value: '3'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'ed1952b2d60440f9a4a5e0b45a6601ea'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'approved_by'
+                            language: 'en'
                         }
                     },
                     {
@@ -1584,6 +2049,15 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_choice'
+                        id: 'f0112fd95c034fc59f0cda792aa1b913'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_scope'
+                            value: 'baixo'
+                        }
+                    },
+                    {
                         table: 'ua_table_licensing_config'
                         id: 'f1438009a7ad47109e9f082d59eccc9b'
                         key: {
@@ -1597,6 +2071,14 @@ declare global {
                             name: 'x_snc_almcaixa_planos_teste'
                             element: 'codigo'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'f2fd9636650b41e49bc1aab470d271f5'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'description'
                         }
                     },
                     {
@@ -1627,6 +2109,14 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_dictionary'
+                        id: 'f5d7b7d42f564a9b947d3715f3594ebd'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'approved_by'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'f6156614aece4db382391be95a880ea8'
                         key: {
@@ -1642,6 +2132,23 @@ declare global {
                             name: 'x_snc_almcaixa_requisitos'
                             element: 'prioridade'
                             value: 'alta'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'f804b42c488a446c96680da56a68e9d0'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'requested_by'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'f98c31696dcf448da5f58aa2b372bc5e'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'impact_schedule'
                         }
                     },
                     {
@@ -1677,6 +2184,14 @@ declare global {
                             name: 'x_snc_almcaixa_requisitos'
                             element: 'titulo'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'ff017e8c2fe94f1593b660de7471771c'
+                        key: {
+                            name: 'x_snc_almcaixa_change_request'
+                            element: 'related_need'
                         }
                     },
                 ]

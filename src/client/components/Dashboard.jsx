@@ -5,21 +5,23 @@ export default function Dashboard() {
     necessidades: 0,
     requisitos: 0,
     historias: 0,
-    planos: 0
+    planos: 0,
+    changeRequests: 0
   })
   const [loading, setLoading] = useState(true)
   const [recentActivities] = useState([
     { id: 1, type: 'necessidade', title: 'Nova necessidade criada: Portal de Autoatendimento', time: '2 horas atrás' },
     { id: 2, type: 'requisito', title: 'Requisito RF-001 aprovado', time: '4 horas atrás' },
     { id: 3, type: 'historia', title: 'História US-005 movida para "Em Teste"', time: '6 horas atrás' },
-    { id: 4, type: 'plano', title: 'Plano de teste TC-001 executado com sucesso', time: '1 dia atrás' },
+    { id: 4, type: 'change-request', title: 'Change Request CRQ0001001 aprovado', time: '8 horas atrás' },
+    { id: 5, type: 'plano', title: 'Plano de teste TC-001 executado com sucesso', time: '1 dia atrás' },
   ])
 
   useEffect(() => {
     const loadMetrics = async () => {
       try {
         // Load metrics from each table
-        const [necesRes, reqRes, histRes, planRes] = await Promise.all([
+        const [necesRes, reqRes, histRes, planRes, crRes] = await Promise.all([
           fetch('/api/now/table/x_snc_almcaixa_necessidades?sysparm_limit=1&sysparm_display_value=all', {
             headers: { "Accept": "application/json", "X-UserToken": window.g_ck }
           }),
@@ -31,6 +33,9 @@ export default function Dashboard() {
           }),
           fetch('/api/now/table/x_snc_almcaixa_planos_teste?sysparm_limit=1&sysparm_display_value=all', {
             headers: { "Accept": "application/json", "X-UserToken": window.g_ck }
+          }),
+          fetch('/api/now/table/x_snc_almcaixa_change_request?sysparm_limit=1&sysparm_display_value=all', {
+            headers: { "Accept": "application/json", "X-UserToken": window.g_ck }
           })
         ])
 
@@ -38,7 +43,8 @@ export default function Dashboard() {
           necessidades: necesRes.headers.get('X-Total-Count') || 0,
           requisitos: reqRes.headers.get('X-Total-Count') || 0,
           historias: histRes.headers.get('X-Total-Count') || 0,
-          planos: planRes.headers.get('X-Total-Count') || 0
+          planos: planRes.headers.get('X-Total-Count') || 0,
+          changeRequests: crRes.headers.get('X-Total-Count') || 0
         })
       } catch (error) {
         console.error('Failed to load metrics:', error)
@@ -78,6 +84,13 @@ export default function Dashboard() {
       icon: '🧪',
       color: 'var(--warning)',
       bgGradient: 'linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)'
+    },
+    {
+      title: 'Change Requests',
+      value: metrics.changeRequests,
+      icon: '🔄',
+      color: 'var(--info)',
+      bgGradient: 'linear-gradient(135deg, #6f42c1 0%, #007bff 100%)'
     }
   ]
 
@@ -97,7 +110,7 @@ export default function Dashboard() {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-4" style={{ marginBottom: '2rem' }}>
+      <div className="grid grid-5" style={{ marginBottom: '2rem' }}>
         {metricCards.map((metric, index) => (
           <div key={index} className="metric-card">
             <div className="metric-icon">{metric.icon}</div>
@@ -123,6 +136,7 @@ export default function Dashboard() {
                   {activity.type === 'requisito' && '📋'}
                   {activity.type === 'historia' && '👤'}
                   {activity.type === 'plano' && '🧪'}
+                  {activity.type === 'change-request' && '🔄'}
                 </div>
                 <div className="activity-content">
                   <p className="activity-title">{activity.title}</p>
@@ -167,11 +181,24 @@ export default function Dashboard() {
               <span className="action-icon">🧪</span>
               <span className="action-label">Novo Plano de Teste</span>
             </button>
+            <button 
+              className="quick-action-btn"
+              onClick={() => window.location.hash = 'change-requests'}
+            >
+              <span className="action-icon">🔄</span>
+              <span className="action-label">Nova Change Request</span>
+            </button>
           </div>
         </div>
       </div>
 
       <style jsx>{`
+        .grid-5 {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1rem;
+        }
+        
         .metric-card {
           background: white;
           border-radius: 12px;
