@@ -11,7 +11,7 @@ export default function PlanosTeste() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterPrioridade, setFilterPrioridade] = useState('')
-  const [viewMode, setViewMode] = useState('cards') // 'cards', 'lista'
+  const [viewMode, setViewMode] = useState('cards') // 'cards', 'list', 'kanban'
 
   const service = useMemo(() => new PlanosTesteService(), [])
 
@@ -73,6 +73,16 @@ export default function PlanosTeste() {
     }
   }
 
+  const handleStatusChange = async (item, newStatus) => {
+    try {
+      const sysId = value(item.sys_id)
+      await service.update(sysId, { status: newStatus })
+      await refreshData()
+    } catch (err) {
+      setError('Falha ao atualizar status: ' + (err.message || 'Erro desconhecido'))
+    }
+  }
+
   const filteredPlanos = planos.filter(item => {
     const matchesSearch = display(item.titulo).toLowerCase().includes(searchTerm.toLowerCase()) ||
                          display(item.codigo).toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -130,7 +140,7 @@ export default function PlanosTeste() {
 
   return (
     <div className="content-container">
-      <div className="page-header-wrapper">
+      <div className="page-header">
         <div className="page-title-section">
           <h1 className="page-title">Planos de Teste</h1>
           <p className="page-subtitle">Definição de casos de teste com pré-condições, passos e resultados esperados</p>
@@ -150,21 +160,31 @@ export default function PlanosTeste() {
       )}
 
       <div className="card">
-        <div className="filters-header">
-          <h2 className="card-title">Filtros e Busca</h2>
-          <div className="view-toggles">
-            <button 
-              className={`btn ${viewMode === 'cards' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setViewMode('cards')}
-            >
-              📊 Cards
-            </button>
-            <button 
-              className={`btn ${viewMode === 'lista' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setViewMode('lista')}
-            >
-              📋 Lista
-            </button>
+        <div className="card-header">
+          <div className="filters-section">
+            <h2 className="card-title">
+              Planos de Teste ({filteredPlanos.length})
+            </h2>
+            <div className="view-toggle">
+              <button 
+                className={`btn btn-sm ${viewMode === 'cards' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setViewMode('cards')}
+              >
+                📊 Cards
+              </button>
+              <button 
+                className={`btn btn-sm ${viewMode === 'list' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setViewMode('list')}
+              >
+                📋 Lista
+              </button>
+              <button 
+                className={`btn btn-sm ${viewMode === 'kanban' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setViewMode('kanban')}
+              >
+                🗂️ Kanban
+              </button>
+            </div>
           </div>
         </div>
         
@@ -210,6 +230,7 @@ export default function PlanosTeste() {
         </div>
       </div>
 
+      {/* Visualização em Cards */}
       {viewMode === 'cards' && (
         <CardsView
           planos={filteredPlanos}
@@ -220,11 +241,25 @@ export default function PlanosTeste() {
         />
       )}
 
-      {viewMode === 'lista' && (
+      {/* Visualização em Lista */}
+      {viewMode === 'list' && (
         <ListaView
           planos={filteredPlanos}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          getStatusBadge={getStatusBadge}
+          getPrioridadeBadge={getPrioridadeBadge}
+          formatDate={formatDate}
+        />
+      )}
+
+      {/* Visualização em Kanban */}
+      {viewMode === 'kanban' && (
+        <KanbanView
+          planos={filteredPlanos}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
           getStatusBadge={getStatusBadge}
           getPrioridadeBadge={getPrioridadeBadge}
           formatDate={formatDate}
@@ -246,41 +281,34 @@ export default function PlanosTeste() {
       )}
 
       <style jsx>{`
-        .page-header-wrapper {
+        .page-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 2rem;
-          gap: 2rem;
-        }
-
-        .page-title-section {
-          flex: 1;
-        }
-
-        .page-actions {
-          display: flex;
-          gap: 0.5rem;
-          align-items: center;
-        }
-
-        .filters-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 1rem;
           padding-bottom: 1rem;
-          border-bottom: 1px solid #eee;
+          border-bottom: 2px solid #f0f2f5;
+        }
+        
+        .page-title-section h1 {
+          margin: 0 0 0.5rem 0;
+        }
+        
+        .page-title-section p {
+          margin: 0;
+          color: #666;
         }
 
-        .view-toggles {
+        .filters-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
+
+        .view-toggle {
           display: flex;
           gap: 0.5rem;
-        }
-
-        .view-toggles .btn {
-          padding: 0.5rem 1rem;
-          font-size: 0.85rem;
         }
 
         .filters-row {
@@ -297,32 +325,40 @@ export default function PlanosTeste() {
           font-size: 1.1rem;
         }
 
+        .error-message {
+          background: #f8d7da;
+          border: 1px solid #f5c6cb;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-bottom: 1.5rem;
+          color: #721c24;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .error-message button {
+          background: none;
+          border: none;
+          color: #721c24;
+          cursor: pointer;
+          font-weight: bold;
+        }
+
         @media (max-width: 768px) {
-          .page-header-wrapper {
+          .page-header {
             flex-direction: column;
-            align-items: stretch;
-          }
-
-          .page-actions {
-            justify-content: stretch;
-          }
-
-          .page-actions .btn {
-            flex: 1;
-          }
-
-          .filters-header {
-            flex-direction: column;
-            align-items: stretch;
             gap: 1rem;
+          }
+
+          .filters-section {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
           }
 
           .filters-row {
             grid-template-columns: 1fr;
-          }
-
-          .view-toggles {
-            justify-content: center;
           }
         }
       `}</style>
@@ -357,7 +393,10 @@ function CardsView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
           
           <div className="plano-content">
             <h3 className="plano-titulo">{display(item.titulo)}</h3>
-            <p className="plano-descricao">{display(item.descricao)}</p>
+            
+            <div className="plano-descricao-section">
+              <p className="plano-descricao">{display(item.descricao)}</p>
+            </div>
 
             {display(item.pre_condicoes) && (
               <div className="plano-section">
@@ -376,10 +415,14 @@ function CardsView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
               <p>{display(item.resultado_esperado).substring(0, 100)}...</p>
             </div>
 
-            <div className="plano-dates">
-              <p><strong>Criado em:</strong> {new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}</p>
+            <div className="plano-info">
+              <p className="plano-data">
+                <strong>Criado em:</strong> {new Date(display(item.data_criacao)).toLocaleDateString('pt-BR')}
+              </p>
               {display(item.data_execucao) && (
-                <p><strong>Executado em:</strong> {new Date(display(item.data_execucao)).toLocaleDateString('pt-BR')}</p>
+                <p className="plano-execucao">
+                  <strong>Executado em:</strong> {new Date(display(item.data_execucao)).toLocaleDateString('pt-BR')}
+                </p>
               )}
             </div>
           </div>
@@ -439,18 +482,26 @@ function CardsView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
           margin: 1rem 0;
         }
         
+        .plano-descricao-section {
+          background: #f8f9fa;
+          padding: 1rem;
+          border-radius: 8px;
+          margin: 1rem 0;
+        }
+
         .plano-descricao {
-          color: var(--dark);
+          margin: 0;
           line-height: 1.5;
-          margin: 0 0 1rem 0;
+          color: var(--dark);
         }
 
         .plano-section {
           margin: 1rem 0;
           padding: 0.75rem;
-          background: #f8f9fa;
+          background: #e3f2fd;
           border-radius: 6px;
           font-size: 0.9rem;
+          border-left: 4px solid #2196f3;
         }
 
         .plano-section p {
@@ -459,16 +510,24 @@ function CardsView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
           line-height: 1.4;
         }
 
-        .plano-dates {
-          margin: 1rem 0 0 0;
-          padding-top: 1rem;
-          border-top: 1px solid #eee;
+        .plano-info {
+          margin: 1rem 0;
+          padding: 0.75rem;
+          background: #f0f8ff;
+          border-radius: 6px;
+          font-size: 0.9rem;
         }
 
-        .plano-dates p {
-          font-size: 0.85rem;
-          color: #666;
+        .plano-data,
+        .plano-execucao {
           margin: 0.25rem 0;
+          color: #666;
+          line-height: 1.4;
+        }
+
+        .plano-execucao {
+          color: #28a745;
+          font-weight: 500;
         }
         
         .card-actions {
@@ -490,7 +549,7 @@ function CardsView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
   )
 }
 
-// Lista View Component - PADRÃO APLICADO DA PÁGINA DE REQUISITOS
+// Lista View Component
 function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadge, formatDate }) {
   return (
     <div className="planos-table-container">
@@ -563,7 +622,6 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
       </table>
 
       <style jsx>{`
-        /* Estilos aplicados da página de Requisitos */
         .planos-table-container {
           margin-top: 1.5rem;
           background: white;
@@ -653,6 +711,324 @@ function ListaView({ planos, onEdit, onDelete, getStatusBadge, getPrioridadeBadg
           
           .planos-table {
             min-width: 1100px;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Kanban View Component
+function KanbanView({ planos, onEdit, onDelete, onStatusChange, getStatusBadge, getPrioridadeBadge, formatDate }) {
+  const statusColumns = [
+    { key: 'planejado', label: 'Planejado', color: '#6c757d' },
+    { key: 'em_execucao', label: 'Em Execução', color: '#17a2b8' },
+    { key: 'passou', label: 'Passou', color: '#28a745' },
+    { key: 'falhou', label: 'Falhou', color: '#dc3545' },
+    { key: 'bloqueado', label: 'Bloqueado', color: '#ffc107' }
+  ]
+
+  const getPlanosPorStatus = (status) => {
+    return planos.filter(item => value(item.status) === status)
+  }
+
+  const handleDragStart = (e, item) => {
+    e.dataTransfer.setData('text/plain', value(item.sys_id))
+    e.dataTransfer.setData('application/json', JSON.stringify(item))
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = (e, newStatus) => {
+    e.preventDefault()
+    try {
+      const itemData = e.dataTransfer.getData('application/json')
+      const item = JSON.parse(itemData)
+      
+      if (value(item.status) !== newStatus) {
+        onStatusChange(item, newStatus)
+      }
+    } catch (error) {
+      console.error('Erro ao processar drop:', error)
+    }
+  }
+
+  return (
+    <div className="kanban-container">
+      <div className="kanban-board">
+        {statusColumns.map(column => (
+          <div 
+            key={column.key}
+            className="kanban-column"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, column.key)}
+          >
+            <div className="column-header" style={{ backgroundColor: column.color }}>
+              <h3 className="column-title">{column.label}</h3>
+              <span className="column-count">
+                {getPlanosPorStatus(column.key).length}
+              </span>
+            </div>
+            
+            <div className="column-content">
+              {getPlanosPorStatus(column.key).map(item => (
+                <div
+                  key={value(item.sys_id)}
+                  className="kanban-card"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, item)}
+                >
+                  <div className="card-badges">
+                    <span className="badge badge-primary">
+                      {display(item.numero)}
+                    </span>
+                    <span className="badge badge-accent">
+                      {display(item.codigo)}
+                    </span>
+                  </div>
+                  
+                  <h4 className="card-title">{display(item.titulo)}</h4>
+                  
+                  <div className="card-description">
+                    <p>{display(item.descricao).substring(0, 80)}...</p>
+                  </div>
+
+                  <div className="card-test-info">
+                    {display(item.passos_teste) && (
+                      <div className="test-steps">
+                        <strong>Passos:</strong>
+                        <p>{display(item.passos_teste).substring(0, 60)}...</p>
+                      </div>
+                    )}
+                    {display(item.resultado_esperado) && (
+                      <div className="expected-result">
+                        <strong>Esperado:</strong>
+                        <p>{display(item.resultado_esperado).substring(0, 60)}...</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="card-meta">
+                    <span className={`badge ${getPrioridadeBadge(item.prioridade)}`}>
+                      {display(item.prioridade)}
+                    </span>
+                    <span className="card-date">
+                      📅 {formatDate(item.data_criacao).split(' ')[0]}
+                    </span>
+                  </div>
+
+                  {display(item.data_execucao) && (
+                    <div className="execution-date">
+                      ✅ Executado: {formatDate(item.data_execucao).split(' ')[0]}
+                    </div>
+                  )}
+                  
+                  <div className="card-actions">
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => onEdit(item)}
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => onDelete(item)}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <style jsx>{`
+        .kanban-container {
+          margin-top: 1.5rem;
+        }
+
+        .kanban-board {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 1rem;
+          min-height: 600px;
+        }
+
+        .kanban-column {
+          background: #f8f9fa;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .column-header {
+          padding: 1rem;
+          color: white;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .column-title {
+          margin: 0;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+
+        .column-count {
+          background: rgba(255,255,255,0.2);
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.8rem;
+        }
+
+        .column-content {
+          padding: 1rem;
+          min-height: 500px;
+        }
+
+        .kanban-card {
+          background: white;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-bottom: 0.75rem;
+          box-shadow: var(--shadow-sm);
+          cursor: grab;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .kanban-card:hover {
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .kanban-card:active {
+          cursor: grabbing;
+        }
+
+        .card-badges {
+          display: flex;
+          gap: 0.25rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .card-badges .badge {
+          font-size: 0.7rem;
+          padding: 0.2rem 0.5rem;
+        }
+
+        .card-title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--primary);
+          margin: 0 0 0.75rem 0;
+          line-height: 1.3;
+        }
+
+        .card-description {
+          background: #f8f9fa;
+          padding: 0.5rem;
+          border-radius: 4px;
+          margin-bottom: 0.75rem;
+        }
+
+        .card-description p {
+          margin: 0;
+          font-size: 0.8rem;
+          line-height: 1.3;
+          color: #666;
+        }
+
+        .card-test-info {
+          font-size: 0.75rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .test-steps {
+          background: #e3f2fd;
+          padding: 0.5rem;
+          border-radius: 4px;
+          margin-bottom: 0.5rem;
+          border-left: 3px solid #2196f3;
+        }
+
+        .expected-result {
+          background: #e8f5e8;
+          padding: 0.5rem;
+          border-radius: 4px;
+          border-left: 3px solid #4caf50;
+        }
+
+        .test-steps strong,
+        .expected-result strong {
+          color: var(--primary);
+          display: block;
+          margin-bottom: 0.25rem;
+        }
+
+        .test-steps p,
+        .expected-result p {
+          margin: 0;
+          line-height: 1.3;
+          color: #666;
+        }
+
+        .card-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+        }
+
+        .card-meta .badge {
+          font-size: 0.6rem;
+          padding: 0.2rem 0.4rem;
+        }
+
+        .card-date {
+          font-size: 0.7rem;
+          color: #666;
+        }
+
+        .execution-date {
+          background: #d4edda;
+          color: #155724;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          margin-bottom: 0.75rem;
+          font-weight: 500;
+        }
+
+        .card-actions {
+          display: flex;
+          gap: 0.25rem;
+          justify-content: flex-end;
+        }
+
+        .card-actions .btn {
+          padding: 0.25rem 0.5rem;
+          font-size: 0.75rem;
+        }
+
+        @media (max-width: 1400px) {
+          .kanban-board {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 1000px) {
+          .kanban-board {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 600px) {
+          .kanban-board {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
@@ -818,21 +1194,21 @@ function PlanoTesteForm({ item, onSubmit, onCancel }) {
             </button>
           </div>
         </form>
-      </div>
-
-      <style jsx>{`
-        .form-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-        }
-
-        @media (max-width: 768px) {
+        
+        <style jsx>{`
           .form-row {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
           }
-        }
-      `}</style>
+
+          @media (max-width: 768px) {
+            .form-row {
+              grid-template-columns: 1fr;
+            }
+          }
+        `}</style>
+      </div>
     </div>
   )
 }
